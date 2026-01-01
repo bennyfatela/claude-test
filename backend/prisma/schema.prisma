@@ -1,0 +1,155 @@
+// Prisma schema for Handball Team Management
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Position {
+  GOALKEEPER
+  LEFT_WING
+  LEFT_BACK
+  CENTER_BACK
+  PIVOT
+  RIGHT_BACK
+  RIGHT_WING
+}
+
+enum EventType {
+  GOAL
+  SAVE
+  TECHNICAL_FOUL
+  TWO_MINUTE_SUSPENSION
+  YELLOW_CARD
+  RED_CARD
+  SEVEN_METER_THROW
+  ASSIST
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum SessionType {
+  TRAINING
+  GAME
+}
+
+model Player {
+  id                String             @id @default(uuid())
+  firstName         String
+  lastName          String
+  jerseyNumber      Int?
+  position          Position
+  dateOfBirth       DateTime?
+  comments          String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  attendanceRecords AttendanceRecord[]
+  gameEvents        GameEvent[]
+
+  @@map("players")
+}
+
+model TrainingSession {
+  id                String             @id @default(uuid())
+  date              DateTime
+  startTime         DateTime
+  endTime           DateTime?
+  location          String?
+  comments          String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  drills            DrillSession[]
+  attendanceRecords AttendanceRecord[]
+
+  @@map("training_sessions")
+}
+
+model Game {
+  id                String             @id @default(uuid())
+  date              DateTime
+  startTime         DateTime
+  opponent          String
+  location          String?
+  homeGame          Boolean            @default(true)
+  finalScore        String?
+  videoUrl          String?
+  comments          String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  events            GameEvent[]
+  attendanceRecords AttendanceRecord[]
+
+  @@map("games")
+}
+
+model Drill {
+  id          String         @id @default(uuid())
+  name        String
+  description String?
+  duration    Int?
+  category    String?
+  isTemplate  Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  sessions    DrillSession[]
+
+  @@map("drills")
+}
+
+model DrillSession {
+  id                 String          @id @default(uuid())
+  drillId            String
+  trainingSessionId  String
+  orderInSession     Int?
+  
+  drill              Drill           @relation(fields: [drillId], references: [id], onDelete: Cascade)
+  trainingSession    TrainingSession @relation(fields: [trainingSessionId], references: [id], onDelete: Cascade)
+
+  @@map("drill_sessions")
+}
+
+model AttendanceRecord {
+  id              String           @id @default(uuid())
+  playerId        String
+  sessionId       String
+  sessionType     SessionType
+  status          AttendanceStatus
+  notes           String?
+  createdAt       DateTime         @default(now())
+  
+  player          Player           @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  trainingSession TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  game            Game?            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("attendance_records")
+}
+
+model GameEvent {
+  id             String    @id @default(uuid())
+  gameId         String
+  playerId       String?
+  eventType      EventType
+  timestamp      Int
+  videoTimestamp Int?
+  period         Int?
+  comments       String?
+  createdAt      DateTime  @default(now())
+  
+  game           Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  player         Player?   @relation(fields: [playerId], references: [id], onDelete: SetNull)
+
+  @@map("game_events")
+}
