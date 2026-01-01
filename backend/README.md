@@ -27,7 +27,7 @@ src/
 
 1. Install dependencies:
    ```bash
-   pnpm install
+   npm install
    ```
 
 2. Copy environment variables:
@@ -43,22 +43,22 @@ src/
 
 4. Run Prisma migrations:
    ```bash
-   pnpm prisma:migrate
+   npm run prisma:migrate
    ```
 
 5. Start development server:
    ```bash
-   pnpm dev
+   npm run dev
    ```
 
 ## Available Scripts
 
-- `pnpm dev` - Start development server with hot reload
-- `pnpm build` - Build for production
-- `pnpm start` - Start production server
-- `pnpm prisma:generate` - Generate Prisma client
-- `pnpm prisma:migrate` - Run database migrations
-- `pnpm prisma:studio` - Open Prisma Studio
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run prisma:generate` - Generate Prisma client
+- `npm run prisma:migrate` - Run database migrations
+- `npm run prisma:studio` - Open Prisma Studio
 
 ## GraphQL API
 

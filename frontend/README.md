@@ -38,30 +38,30 @@ src/
 
 1. Install dependencies:
    ```bash
-   pnpm install
+   npm install
    ```
 
 2. Start development server:
    ```bash
-   pnpm dev
+   npm run dev
    ```
 
 3. Build for production:
    ```bash
-   pnpm build
+   npm run build
    ```
 
 4. Preview production build:
    ```bash
-   pnpm preview
+   npm run preview
    ```
 
 ## Available Scripts
 
-- `pnpm dev` - Start development server (http://localhost:5173)
-- `pnpm build` - Type-check and build for production
-- `pnpm preview` - Preview production build locally
-- `pnpm type-check` - Run TypeScript type checking
+- `npm run dev` - Start development server (http://localhost:5173)
+- `npm run build` - Type-check and build for production
+- `npm run preview` - Preview production build locally
+- `npm run type-check` - Run TypeScript type checking
 
 ## Features (Planned)
 

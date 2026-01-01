@@ -41,7 +41,7 @@ A comprehensive application for managing handball teams, including player manage
 ### Prerequisites
 - Node.js 18+
 - Docker & Docker Compose
-- pnpm (recommended) or npm
+- npm
 
 ### Quick Start
 
@@ -50,11 +50,11 @@ A comprehensive application for managing handball teams, including player manage
    ```bash
    # Backend
    cd backend
-   pnpm install
+   npm install
 
    # Frontend
    cd ../frontend
-   pnpm install
+   npm install
    ```
 
 3. Start development environment:
@@ -66,13 +66,13 @@ A comprehensive application for managing handball teams, including player manage
 4. Run backend:
    ```bash
    cd backend
-   pnpm dev
+   npm run dev
    ```
 
 5. Run frontend:
    ```bash
    cd frontend
-   pnpm dev
+   npm run dev
    ```
 
 ## Development
