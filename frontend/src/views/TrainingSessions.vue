@@ -1,10 +1,60 @@
 <template>
   <div class="training-sessions">
-    <h2>Training Sessions</h2>
-    <p>Training sessions and drills management - to be implemented</p>
+    <div class="page-header flex justify-between items-center mb-4">
+      <div>
+        <p class="text-muted text-sm mb-2">Training Schedule & Drills</p>
+      </div>
+      <button class="btn btn-primary">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
+        </svg>
+        New Session
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 20 20" fill="currentColor" class="empty-icon">
+          <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"/>
+        </svg>
+        <h3>No Training Sessions</h3>
+        <p class="empty-text">Create training sessions and build drill templates to improve team performance.</p>
+        <button class="btn btn-primary mt-4">Plan First Session</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 // Training sessions component - placeholder only
 </script>
+
+<style scoped>
+.page-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+}
+
+.empty-icon {
+  color: var(--gray-300);
+  margin-bottom: var(--spacing-lg);
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-text {
+  max-width: 400px;
+  margin-bottom: 0;
+}
+</style>
