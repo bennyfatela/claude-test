@@ -10,8 +10,8 @@
         </div>
         <div class="stat-content">
           <p class="stat-label">Total Players</p>
-          <p class="stat-value">0</p>
-          <p class="stat-change positive">Ready for season</p>
+          <p class="stat-value">{{ playersCount }}</p>
+          <p class="stat-change positive">{{ playersCount > 0 ? 'Ready for season' : 'Add players' }}</p>
         </div>
       </div>
 
@@ -133,7 +133,11 @@
 </template>
 
 <script setup lang="ts">
-// Dashboard component - placeholder only
+import { computed } from 'vue';
+import { usePlayersStore } from '../stores/players';
+
+const playersStore = usePlayersStore();
+const playersCount = computed(() => playersStore.playersCount);
 </script>
 
 <style scoped>
