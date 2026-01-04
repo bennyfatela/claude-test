@@ -46,6 +46,17 @@
     </div>
 
     <div class="session-body">
+      <div v-if="isRecurring" class="recurring-badge">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+          <path
+            fill-rule="evenodd"
+            d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <span>{{ t('trainingSessions.partOfRecurringSeries') }}</span>
+      </div>
+
       <div class="session-info">
         <div class="info-item">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" class="info-icon">
@@ -114,36 +125,32 @@
       </div>
     </div>
 
-    <!-- Delete confirmation modal -->
-    <div v-if="showDeleteModal" class="modal-overlay" @click.self="showDeleteModal = false">
-      <div class="modal-content">
-        <h3>{{ isRecurring ? t('trainingSessions.deleteSession') : t('trainingSessions.confirmDelete') }}</h3>
-        <p v-if="!isRecurring">{{ t('trainingSessions.confirmDelete') }}</p>
-
-        <div v-if="isRecurring" class="delete-options">
-          <button class="btn btn-secondary" @click="deleteThisInstance">
-            {{ t('trainingSessions.deleteThisInstance') }}
-          </button>
-          <button class="btn btn-danger" @click="deleteAllInstances">
-            {{ t('trainingSessions.deleteAllInstances') }} ({{ recurringCount }})
-          </button>
-        </div>
-        <div v-else class="modal-actions">
-          <button class="btn btn-secondary" @click="showDeleteModal = false">
-            {{ t('common.cancel') }}
-          </button>
-          <button class="btn btn-danger" @click="confirmDelete">
-            {{ t('common.delete') }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Delete confirmation dialog -->
+    <ConfirmDialog
+      :isOpen="showDeleteModal"
+      :title="isRecurring ? t('trainingSessions.deleteSession') : t('trainingSessions.confirmDelete')"
+      :message="isRecurring ? t('trainingSessions.deleteRecurringMessage') : t('trainingSessions.confirmDeleteMessage')"
+      :danger="true"
+      :confirmText="t('common.delete')"
+      @confirm="confirmDelete"
+      @cancel="showDeleteModal = false"
+    >
+      <template v-if="isRecurring" #footer>
+        <button class="btn btn-secondary" @click="deleteThisInstance">
+          {{ t('trainingSessions.deleteThisInstance') }}
+        </button>
+        <button class="btn btn-danger" @click="deleteAllInstances">
+          {{ t('trainingSessions.deleteAllInstances') }} ({{ recurringCount }})
+        </button>
+      </template>
+    </ConfirmDialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import ConfirmDialog from './ConfirmDialog.vue';
 import type { TrainingSession } from '../types';
 import { SessionObjective, SessionComponent } from '../types';
 
@@ -284,6 +291,24 @@ const confirmDelete = () => {
   gap: var(--spacing-sm);
 }
 
+.recurring-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  border-radius: var(--border-radius);
+  font-size: 0.75rem;
+  font-weight: 500;
+  width: fit-content;
+  margin-bottom: var(--spacing-xs);
+}
+
+.recurring-badge svg {
+  flex-shrink: 0;
+}
+
 .session-info {
   display: flex;
   flex-wrap: wrap;
@@ -372,57 +397,19 @@ const confirmDelete = () => {
   line-height: 1.5;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-lg);
-  max-width: 400px;
-  width: 90%;
-  box-shadow: var(--shadow-xl);
-}
-
-.modal-content h3 {
-  margin: 0 0 var(--spacing-md) 0;
-  font-size: 1.25rem;
-}
-
-.modal-content p {
-  margin: 0 0 var(--spacing-lg) 0;
-  color: var(--gray-600);
-}
-
-.delete-options {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-sm);
-}
-
 .btn {
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
   border-radius: var(--border-radius);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 .btn-secondary {
@@ -433,6 +420,7 @@ const confirmDelete = () => {
 
 .btn-secondary:hover {
   background-color: var(--gray-50);
+  border-color: var(--gray-400);
 }
 
 .btn-danger {

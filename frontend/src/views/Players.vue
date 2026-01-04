@@ -55,6 +55,17 @@
       @close="closeForm"
       @submit="handleSubmit"
     />
+
+    <!-- Delete Confirmation Dialog -->
+    <ConfirmDialog
+      :isOpen="showDeleteDialog"
+      :title="t('players.deletePlayer')"
+      :message="playerToDelete ? t('players.confirmDelete', { name: `${playerToDelete.firstName} ${playerToDelete.lastName}` }) : ''"
+      :danger="true"
+      :confirmText="t('common.delete')"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </div>
 </template>
 
@@ -65,6 +76,7 @@ import { usePlayersStore } from '../stores/players';
 import PlayerCard from '../components/PlayerCard.vue';
 import PlayerForm from '../components/PlayerForm.vue';
 import PositionFilter from '../components/PositionFilter.vue';
+import ConfirmDialog from '../components/ConfirmDialog.vue';
 import type { Player, Position } from '../types';
 
 const { t } = useI18n();
@@ -72,6 +84,8 @@ const playersStore = usePlayersStore();
 const showForm = ref(false);
 const editingPlayer = ref<Player | null>(null);
 const selectedPosition = ref<Position | null>(null);
+const showDeleteDialog = ref(false);
+const playerToDelete = ref<Player | null>(null);
 
 const playersCount = computed(() => playersStore.playersCount);
 
@@ -109,10 +123,21 @@ function handleEdit(player: Player) {
 }
 
 function handleDelete(player: Player) {
-  const message = t('players.confirmDelete', { name: `${player.firstName} ${player.lastName}` });
-  if (confirm(message)) {
-    playersStore.deletePlayer(player.id);
+  playerToDelete.value = player;
+  showDeleteDialog.value = true;
+}
+
+function confirmDelete() {
+  if (playerToDelete.value) {
+    playersStore.deletePlayer(playerToDelete.value.id);
+    playerToDelete.value = null;
   }
+  showDeleteDialog.value = false;
+}
+
+function cancelDelete() {
+  playerToDelete.value = null;
+  showDeleteDialog.value = false;
 }
 
 function closeForm() {

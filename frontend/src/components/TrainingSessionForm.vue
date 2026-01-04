@@ -51,39 +51,33 @@
 
         <div class="form-group">
           <label>{{ t('trainingSessions.form.objectives') }}</label>
-          <div class="checkbox-grid">
-            <label
+          <div class="chip-grid">
+            <button
               v-for="option in objectiveOptions"
               :key="option.value"
-              class="checkbox-label"
+              type="button"
+              class="chip"
+              :class="{ 'chip-active': formData.objectives?.includes(option.value) }"
+              @click="toggleObjective(option.value)"
             >
-              <input
-                type="checkbox"
-                :checked="formData.objectives?.includes(option.value)"
-                @change="toggleObjective(option.value)"
-                class="checkbox-input"
-              />
-              <span>{{ option.label }}</span>
-            </label>
+              {{ option.label }}
+            </button>
           </div>
         </div>
 
         <div class="form-group">
           <label>{{ t('trainingSessions.form.components') }}</label>
-          <div class="checkbox-grid">
-            <label
+          <div class="chip-grid">
+            <button
               v-for="option in componentOptions"
               :key="option.value"
-              class="checkbox-label"
+              type="button"
+              class="chip"
+              :class="{ 'chip-active': formData.components?.includes(option.value) }"
+              @click="toggleComponent(option.value)"
             >
-              <input
-                type="checkbox"
-                :checked="formData.components?.includes(option.value)"
-                @change="toggleComponent(option.value)"
-                class="checkbox-input"
-              />
-              <span>{{ option.label }}</span>
-            </label>
+              {{ option.label }}
+            </button>
           </div>
         </div>
 
@@ -406,28 +400,40 @@ textarea.form-control {
   font-family: inherit;
 }
 
-.checkbox-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing-sm);
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+.chip {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--gray-300);
+  background: white;
+  color: var(--gray-700);
+  border-radius: var(--border-radius-lg);
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: var(--border-radius);
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.checkbox-label:hover {
+.chip:hover {
   background-color: var(--gray-50);
+  border-color: var(--gray-400);
+  transform: translateY(-1px);
 }
 
-.checkbox-input {
-  cursor: pointer;
+.chip-active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.chip-active:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
 }
 
 .days-buttons {

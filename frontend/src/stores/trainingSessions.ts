@@ -123,9 +123,19 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
         while (currentDate <= endDate) {
           sessions.push({
             id: crypto.randomUUID(),
-            ...sessionData,
             date: currentDate.toISOString().split('T')[0],
+            startTime: sessionData.startTime,
+            endTime: sessionData.endTime,
+            location: sessionData.location,
+            // Each session is independent - start with empty objectives, components, comments
+            objectives: [],
+            components: [],
+            comments: '',
+            // Keep recurring info for reference/display only
             recurringId,
+            recurringPattern: sessionData.recurringPattern,
+            recurringDays: sessionData.recurringDays,
+            recurringEndDate: sessionData.recurringEndDate,
           });
 
           // Move to next week
@@ -143,9 +153,19 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
           if (sessionData.recurringDays.includes(dayOfWeek) && currentDate >= startDate) {
             sessions.push({
               id: crypto.randomUUID(),
-              ...sessionData,
               date: currentDate.toISOString().split('T')[0],
+              startTime: sessionData.startTime,
+              endTime: sessionData.endTime,
+              location: sessionData.location,
+              // Each session is independent - start with empty objectives, components, comments
+              objectives: [],
+              components: [],
+              comments: '',
+              // Keep recurring info for reference/display only
               recurringId,
+              recurringPattern: sessionData.recurringPattern,
+              recurringDays: sessionData.recurringDays,
+              recurringEndDate: sessionData.recurringEndDate,
             });
           }
 

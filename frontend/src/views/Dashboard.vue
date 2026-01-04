@@ -36,7 +36,7 @@
         </div>
         <div class="stat-content">
           <p class="stat-label">{{ t('dashboard.stats.trainingSessions') }}</p>
-          <p class="stat-value">0</p>
+          <p class="stat-value">{{ sessionsCount }}</p>
           <p class="stat-change">{{ t('dashboard.stats.thisMonth') }}</p>
         </div>
       </div>
@@ -136,10 +136,13 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePlayersStore } from '../stores/players';
+import { useTrainingSessionsStore } from '../stores/trainingSessions';
 
 const { t } = useI18n();
 const playersStore = usePlayersStore();
+const sessionsStore = useTrainingSessionsStore();
 const playersCount = computed(() => playersStore.playersCount);
+const sessionsCount = computed(() => sessionsStore.sessionsCount);
 </script>
 
 <style scoped>
