@@ -81,9 +81,36 @@
         </div>
       </div>
 
-      <div v-if="session.objective" class="session-objective">
-        <strong>{{ t('trainingSessions.form.objective') }}:</strong>
-        {{ session.objective }}
+      <div v-if="session.objectives && session.objectives.length > 0" class="session-section">
+        <strong class="section-label">{{ t('trainingSessions.form.objectives') }}:</strong>
+        <div class="objectives-list">
+          <span
+            v-for="objective in session.objectives"
+            :key="objective"
+            class="objective-badge"
+            :class="`objective-${objective.toLowerCase()}`"
+          >
+            {{ getObjectiveLabel(objective) }}
+          </span>
+        </div>
+      </div>
+
+      <div v-if="session.components && session.components.length > 0" class="session-section">
+        <strong class="section-label">{{ t('trainingSessions.form.components') }}:</strong>
+        <div class="components-list">
+          <span
+            v-for="component in session.components"
+            :key="component"
+            class="component-tag"
+          >
+            {{ getComponentLabel(component) }}
+          </span>
+        </div>
+      </div>
+
+      <div v-if="session.comments" class="session-section">
+        <strong class="section-label">{{ t('trainingSessions.form.comments') }}:</strong>
+        <p class="session-comments">{{ session.comments }}</p>
       </div>
     </div>
 
@@ -118,6 +145,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { TrainingSession } from '../types';
+import { SessionObjective, SessionComponent } from '../types';
 
 interface Props {
   session: TrainingSession;
@@ -149,7 +177,15 @@ const formatDate = (dateString: string) => {
 };
 
 const formatTime = (timeString: string) => {
-  return timeString;
+  return timeString.substring(0, 5); // HH:MM
+};
+
+const getObjectiveLabel = (objective: SessionObjective) => {
+  return t(`trainingSessions.objectives.${objective}`);
+};
+
+const getComponentLabel = (component: SessionComponent) => {
+  return t(`trainingSessions.components.${component}`);
 };
 
 const handleDelete = () => {
@@ -267,11 +303,73 @@ const confirmDelete = () => {
   flex-shrink: 0;
 }
 
-.session-objective {
+.session-section {
+  padding-top: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  border-top: 1px solid var(--gray-100);
+}
+
+.section-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--gray-600);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.objectives-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.objective-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--border-radius);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.objective-attack {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.objective-defense {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.objective-transitions {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.components-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.component-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--border-radius);
+  font-size: 0.75rem;
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.session-comments {
+  margin: 0;
   font-size: 0.875rem;
   color: var(--gray-700);
-  padding-top: var(--spacing-sm);
-  border-top: 1px solid var(--gray-100);
+  line-height: 1.5;
 }
 
 .modal-overlay {

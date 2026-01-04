@@ -37,6 +37,38 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
   },
 
   actions: {
+    generateSessionTitle(date: string, recurringId?: string): string {
+      // Get all existing sessions sorted by date
+      const sortedSessions = [...this.sessions].sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.startTime.localeCompare(b.startTime);
+      });
+
+      // If this is part of a recurring series, check if any session in the series already has a number
+      if (recurringId) {
+        const existingInSeries = sortedSessions.find((s) => s.recurringId === recurringId);
+        if (existingInSeries?.title) {
+          return existingInSeries.title;
+        }
+      }
+
+      // Find the next session number by counting unique sessions/series before this date
+      const uniqueSessions = new Set<string>();
+      let sessionNumber = 1;
+
+      for (const session of sortedSessions) {
+        if (session.date < date) {
+          // Count unique sessions or recurring series
+          const key = session.recurringId || session.id;
+          uniqueSessions.add(key);
+        }
+      }
+
+      sessionNumber = uniqueSessions.size + 1;
+      return `Session ${sessionNumber}`;
+    },
+
     addSession(sessionData: Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>) {
       const now = new Date().toISOString();
 
@@ -45,9 +77,14 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
         const recurringId = crypto.randomUUID();
         const sessions = this.generateRecurringSessions(sessionData, recurringId);
 
+        // Generate title for the series based on the first session date
+        const firstSessionDate = sessions.length > 0 ? sessions[0].date : sessionData.date;
+        const title = this.generateSessionTitle(firstSessionDate, recurringId);
+
         sessions.forEach((session) => {
           this.sessions.push({
             ...session,
+            title,
             createdAt: now,
             updatedAt: now,
           });
@@ -56,9 +93,11 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
         return sessions;
       } else {
         // Single session
+        const title = this.generateSessionTitle(sessionData.date);
         const newSession: TrainingSession = {
           id: crypto.randomUUID(),
           ...sessionData,
+          title,
           recurringPattern: 'none',
           createdAt: now,
           updatedAt: now,
