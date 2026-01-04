@@ -133,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePlayersStore } from '../stores/players';
 import { useTrainingSessionsStore } from '../stores/trainingSessions';
@@ -143,6 +143,12 @@ const playersStore = usePlayersStore();
 const sessionsStore = useTrainingSessionsStore();
 const playersCount = computed(() => playersStore.playersCount);
 const sessionsCount = computed(() => sessionsStore.sessionsCount);
+
+// Fetch data on mount
+onMounted(() => {
+  playersStore.fetchPlayers();
+  sessionsStore.fetchTrainingSessions();
+});
 </script>
 
 <style scoped>

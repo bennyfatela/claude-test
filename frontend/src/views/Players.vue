@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePlayersStore } from '../stores/players';
 import PlayerCard from '../components/PlayerCard.vue';
@@ -88,6 +88,11 @@ const showDeleteDialog = ref(false);
 const playerToDelete = ref<Player | null>(null);
 
 const playersCount = computed(() => playersStore.playersCount);
+
+// Fetch players on mount
+onMounted(() => {
+  playersStore.fetchPlayers();
+});
 
 const filteredPlayers = computed(() => {
   return playersStore.getPlayersByPosition(selectedPosition.value);
