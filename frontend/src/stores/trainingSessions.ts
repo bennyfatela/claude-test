@@ -5,31 +5,9 @@ interface TrainingSessionsState {
   sessions: TrainingSession[];
 }
 
-const STORAGE_KEY = 'handball-training-sessions';
-
-// Load initial state from localStorage
-function loadSessionsFromStorage(): TrainingSession[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error('Failed to load sessions from storage:', error);
-    return [];
-  }
-}
-
-// Save sessions to localStorage
-function saveSessionsToStorage(sessions: TrainingSession[]): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-  } catch (error) {
-    console.error('Failed to save sessions to storage:', error);
-  }
-}
-
 export const useTrainingSessionsStore = defineStore('trainingSessions', {
   state: (): TrainingSessionsState => ({
-    sessions: loadSessionsFromStorage(),
+    sessions: [],
   }),
 
   getters: {
@@ -112,7 +90,6 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
           });
         });
 
-        saveSessionsToStorage(this.sessions);
         return sessions;
       } else {
         // Single session
@@ -126,7 +103,6 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
           updatedAt: now,
         };
         this.sessions.push(newSession);
-        saveSessionsToStorage(this.sessions);
         return [newSession];
       }
     },
@@ -210,7 +186,6 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
           ...sessionData,
           updatedAt: new Date().toISOString(),
         };
-        saveSessionsToStorage(this.sessions);
         return this.sessions[index];
       }
       return null;
@@ -220,7 +195,6 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
       const index = this.sessions.findIndex((s) => s.id === id);
       if (index !== -1) {
         this.sessions.splice(index, 1);
-        saveSessionsToStorage(this.sessions);
         return true;
       }
       return false;
@@ -229,7 +203,6 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
     deleteAllRecurringSessions(recurringId: string) {
       const sessionsToDelete = this.sessions.filter((s) => s.recurringId === recurringId);
       this.sessions = this.sessions.filter((s) => s.recurringId !== recurringId);
-      saveSessionsToStorage(this.sessions);
       return sessionsToDelete.length;
     },
   },
