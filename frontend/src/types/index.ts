@@ -33,6 +33,19 @@ export enum SessionType {
   GAME = 'GAME',
 }
 
+export enum SessionObjective {
+  ATTACK = 'ATTACK',
+  DEFENSE = 'DEFENSE',
+  TRANSITIONS = 'TRANSITIONS',
+}
+
+export enum SessionComponent {
+  INDIVIDUAL_TACTIC = 'INDIVIDUAL_TACTIC',
+  INDIVIDUAL_TECHNIC = 'INDIVIDUAL_TECHNIC',
+  GROUP_TACTIC = 'GROUP_TACTIC',
+  COLLECTIVE_TACTIC = 'COLLECTIVE_TACTIC',
+}
+
 export interface Player {
   id: string;
   firstName: string;
@@ -48,11 +61,18 @@ export interface Player {
 
 export interface TrainingSession {
   id: string;
+  title?: string;
   date: string;
   startTime: string;
   endTime?: string;
   location?: string;
+  objectives?: SessionObjective[];
+  components?: SessionComponent[];
   comments?: string;
+  recurringId?: string;
+  recurringPattern?: 'none' | 'weekly' | 'custom';
+  recurringDays?: number[];
+  recurringEndDate?: string;
   createdAt: string;
   updatedAt: string;
 }

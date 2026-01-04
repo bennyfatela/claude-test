@@ -1,39 +1,229 @@
 <template>
   <div class="training-sessions">
-    <div class="page-header flex justify-between items-center mb-4">
+    <div class="page-header">
       <div>
         <p class="text-muted text-sm mb-2">{{ t('trainingSessions.subtitle') }}</p>
       </div>
-      <button class="btn btn-primary">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
-        </svg>
-        {{ t('trainingSessions.newSession') }}
-      </button>
+      <div class="header-actions">
+        <div class="view-toggle">
+          <button
+            class="toggle-btn"
+            :class="{ active: viewMode === 'list' }"
+            @click="viewMode = 'list'"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fill-rule="evenodd"
+                d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            {{ t('trainingSessions.viewList') }}
+          </button>
+          <button
+            class="toggle-btn"
+            :class="{ active: viewMode === 'calendar' }"
+            @click="viewMode = 'calendar'"
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fill-rule="evenodd"
+                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            {{ t('trainingSessions.viewCalendar') }}
+          </button>
+        </div>
+        <button class="btn btn-primary" @click="openNewSessionForm">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              fill-rule="evenodd"
+              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          {{ t('trainingSessions.newSession') }}
+        </button>
+      </div>
     </div>
 
-    <div class="card">
+    <!-- Empty State -->
+    <div v-if="sessionsStore.sessionsCount === 0" class="card">
       <div class="empty-state">
         <svg width="64" height="64" viewBox="0 0 20 20" fill="currentColor" class="empty-icon">
-          <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"/>
+          <path
+            fill-rule="evenodd"
+            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+          />
         </svg>
         <h3>{{ t('trainingSessions.noSessions') }}</h3>
         <p class="empty-text">{{ t('trainingSessions.noSessionsText') }}</p>
-        <button class="btn btn-primary mt-4">{{ t('trainingSessions.planFirstSession') }}</button>
+        <button class="btn btn-primary mt-4" @click="openNewSessionForm">
+          {{ t('trainingSessions.planFirstSession') }}
+        </button>
       </div>
     </div>
+
+    <!-- List View -->
+    <div v-else-if="viewMode === 'list'" class="sessions-list">
+      <TrainingSessionCard
+        v-for="session in sessionsStore.getAllSessions"
+        :key="session.id"
+        :session="session"
+        :recurringCount="session.recurringId ? getRecurringCount(session.recurringId) : 0"
+        @edit="handleEditSession"
+        @delete="handleDeleteSession"
+        @deleteAll="handleDeleteAllSessions"
+      />
+    </div>
+
+    <!-- Calendar View -->
+    <CalendarView
+      v-else-if="viewMode === 'calendar'"
+      :sessions="sessionsStore.getAllSessions"
+      @sessionClick="handleEditSession"
+      @dateClick="handleDateClick"
+    />
+
+    <!-- Session Form Modal -->
+    <TrainingSessionForm
+      :isOpen="showSessionForm"
+      :session="editingSession"
+      @close="closeSessionForm"
+      @submit="handleSubmitSession"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useTrainingSessionsStore } from '../stores/trainingSessions';
+import TrainingSessionCard from '../components/TrainingSessionCard.vue';
+import TrainingSessionForm from '../components/TrainingSessionForm.vue';
+import CalendarView from '../components/CalendarView.vue';
+import type { TrainingSession } from '../types';
 
 const { t } = useI18n();
+const sessionsStore = useTrainingSessionsStore();
+
+const viewMode = ref<'list' | 'calendar'>('list');
+const showSessionForm = ref(false);
+const editingSession = ref<TrainingSession | null>(null);
+
+const openNewSessionForm = () => {
+  editingSession.value = null;
+  showSessionForm.value = true;
+};
+
+const closeSessionForm = () => {
+  showSessionForm.value = false;
+  editingSession.value = null;
+};
+
+const handleEditSession = (session: TrainingSession) => {
+  editingSession.value = session;
+  showSessionForm.value = true;
+};
+
+const handleDateClick = (date: string) => {
+  // Open form with pre-filled date
+  editingSession.value = null;
+  showSessionForm.value = true;
+};
+
+const handleSubmitSession = (data: Partial<TrainingSession>) => {
+  if (editingSession.value) {
+    // Update existing session
+    sessionsStore.updateSession(editingSession.value.id, data);
+  } else {
+    // Create new session(s)
+    sessionsStore.addSession(data as Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>);
+  }
+  closeSessionForm();
+};
+
+const handleDeleteSession = (sessionId: string) => {
+  sessionsStore.deleteSession(sessionId);
+};
+
+const handleDeleteAllSessions = (recurringId: string) => {
+  sessionsStore.deleteAllRecurringSessions(recurringId);
+};
+
+const getRecurringCount = (recurringId: string): number => {
+  return sessionsStore.getSessionsByRecurringId(recurringId).length;
+};
 </script>
 
 <style scoped>
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.view-toggle {
+  display: flex;
+  gap: var(--spacing-xs);
+  background-color: var(--gray-100);
+  padding: 4px;
+  border-radius: var(--border-radius);
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: none;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+  background-color: var(--gray-200);
+}
+
+.toggle-btn.active {
+  background-color: white;
+  color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
 }
 
 .empty-state {
@@ -58,5 +248,35 @@ const { t } = useI18n();
 .empty-text {
   max-width: 400px;
   margin-bottom: 0;
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.mt-4 {
+  margin-top: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    flex-direction: column;
+  }
+
+  .view-toggle {
+    width: 100%;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    justify-content: center;
+  }
 }
 </style>

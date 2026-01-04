@@ -1,36 +1,46 @@
 <template>
   <div class="position-filter">
     <label for="position-select" class="filter-label">{{ t('common.filter') }}:</label>
-    <select
-      id="position-select"
-      v-model="selectedValue"
-      @change="handleChange"
-      class="filter-select"
-    >
-      <option value="">{{ t('players.positions.all') }}</option>
+    <div class="filter-controls">
+      <select
+        id="position-select"
+        v-model="selectedValue"
+        @change="handleChange"
+        class="filter-select"
+      >
+        <optgroup :label="t('players.positionGroups.goalkeeper')">
+          <option value="GOALKEEPER">{{ t('players.positions.goalkeeper') }}</option>
+        </optgroup>
 
-      <optgroup :label="t('players.positionGroups.goalkeeper')">
-        <option value="GOALKEEPER">{{ t('players.positions.goalkeeper') }}</option>
-      </optgroup>
+        <optgroup :label="t('players.positionGroups.wings')">
+          <option value="LEFT_WING">{{ t('players.positions.leftWing') }}</option>
+          <option value="RIGHT_WING">{{ t('players.positions.rightWing') }}</option>
+        </optgroup>
 
-      <optgroup :label="t('players.positionGroups.wings')">
-        <option value="LEFT_WING">{{ t('players.positions.leftWing') }}</option>
-        <option value="RIGHT_WING">{{ t('players.positions.rightWing') }}</option>
-      </optgroup>
+        <optgroup :label="t('players.positionGroups.backs')">
+          <option value="LEFT_BACK">{{ t('players.positions.leftBack') }}</option>
+          <option value="RIGHT_BACK">{{ t('players.positions.rightBack') }}</option>
+        </optgroup>
 
-      <optgroup :label="t('players.positionGroups.backs')">
-        <option value="LEFT_BACK">{{ t('players.positions.leftBack') }}</option>
-        <option value="RIGHT_BACK">{{ t('players.positions.rightBack') }}</option>
-      </optgroup>
+        <optgroup :label="t('players.positionGroups.centerBack')">
+          <option value="CENTER_BACK">{{ t('players.positions.centerBack') }}</option>
+        </optgroup>
 
-      <optgroup :label="t('players.positionGroups.centerBack')">
-        <option value="CENTER_BACK">{{ t('players.positions.centerBack') }}</option>
-      </optgroup>
+        <optgroup :label="t('players.positionGroups.pivot')">
+          <option value="PIVOT">{{ t('players.positions.pivot') }}</option>
+        </optgroup>
+      </select>
 
-      <optgroup :label="t('players.positionGroups.pivot')">
-        <option value="PIVOT">{{ t('players.positions.pivot') }}</option>
-      </optgroup>
-    </select>
+      <button
+        type="button"
+        class="clear-filter-btn"
+        :class="{ 'active': !selectedValue }"
+        @click="clearFilter"
+        :title="t('players.positions.all')"
+      >
+        {{ t('players.positions.all') }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -59,6 +69,11 @@ function handleChange(event: Event) {
   const value = target.value as Position | '';
   emit('update:modelValue', value || null);
 }
+
+function clearFilter() {
+  selectedValue.value = '';
+  emit('update:modelValue', null);
+}
 </script>
 
 <style scoped>
@@ -79,6 +94,12 @@ function handleChange(event: Event) {
   white-space: nowrap;
 }
 
+.filter-controls {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
 .filter-select {
   flex: 1;
   padding: 0.5rem 1rem;
@@ -91,6 +112,30 @@ function handleChange(event: Event) {
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 200px;
+}
+
+.clear-filter-btn {
+  padding: 0.5rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.clear-filter-btn:hover {
+  background-color: var(--gray-100);
+  border-color: var(--gray-400);
+}
+
+.clear-filter-btn.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
 }
 
 .filter-select:hover {
