@@ -2,9 +2,9 @@
   <div class="players">
     <div class="page-header">
       <div>
-        <p class="text-muted text-sm mb-2">Team Roster</p>
+        <p class="text-muted text-sm mb-2">{{ t('players.subtitle') }}</p>
         <p class="text-sm text-muted" v-if="playersCount > 0">
-          {{ playersCount }} {{ playersCount === 1 ? 'jogador' : 'jogadores' }}
+          {{ playersCount }} {{ playersCount === 1 ? t('players.playerCount', { count: 1 }).split('|')[0].trim() : t('players.playerCount', { count: playersCount }).split('|')[1].trim() }}
           {{ selectedPosition ? `(${positionFilterLabel})` : '' }}
         </p>
       </div>
@@ -12,30 +12,13 @@
         <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
           <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
         </svg>
-        Adicionar Jogador
+        {{ t('players.addPlayer') }}
       </button>
     </div>
 
     <!-- Filters -->
     <div class="filters-section" v-if="playersCount > 0">
-      <div class="filters">
-        <button
-          class="filter-btn"
-          :class="{ active: selectedPosition === null }"
-          @click="selectedPosition = null"
-        >
-          Todos
-        </button>
-        <button
-          v-for="position in positions"
-          :key="position.value"
-          class="filter-btn"
-          :class="{ active: selectedPosition === position.value }"
-          @click="selectedPosition = position.value"
-        >
-          {{ position.label }}
-        </button>
-      </div>
+      <PositionFilter v-model="selectedPosition" />
     </div>
 
     <!-- Players Grid -->
@@ -55,15 +38,12 @@
         <svg width="64" height="64" viewBox="0 0 20 20" fill="currentColor" class="empty-icon">
           <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
         </svg>
-        <h3>{{ selectedPosition ? 'Nenhum jogador nesta posição' : 'Ainda sem jogadores' }}</h3>
+        <h3>{{ selectedPosition ? t('players.noPlayersInPosition') : t('players.noPlayers') }}</h3>
         <p class="empty-text">
-          {{ selectedPosition
-            ? 'Experimente filtrar por outra posição ou adicionar um novo jogador.'
-            : 'Comece por adicionar o seu primeiro jogador ao plantel dos Sub-18.'
-          }}
+          {{ selectedPosition ? t('players.noPlayersInPositionText') : t('players.noPlayersText') }}
         </p>
         <button class="btn btn-primary mt-4" @click="showForm = true">
-          Adicionar Primeiro Jogador
+          {{ t('players.addFirstPlayer') }}
         </button>
       </div>
     </div>
@@ -80,25 +60,18 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { usePlayersStore } from '../stores/players';
 import PlayerCard from '../components/PlayerCard.vue';
 import PlayerForm from '../components/PlayerForm.vue';
+import PositionFilter from '../components/PositionFilter.vue';
 import type { Player, Position } from '../types';
 
+const { t } = useI18n();
 const playersStore = usePlayersStore();
 const showForm = ref(false);
 const editingPlayer = ref<Player | null>(null);
 const selectedPosition = ref<Position | null>(null);
-
-const positions = [
-  { value: 'GOALKEEPER' as Position, label: 'Guarda-Redes' },
-  { value: 'LEFT_WING' as Position, label: 'Ponta Esquerda' },
-  { value: 'LEFT_BACK' as Position, label: 'Lateral Esquerdo' },
-  { value: 'CENTER_BACK' as Position, label: 'Central' },
-  { value: 'PIVOT' as Position, label: 'Pivot' },
-  { value: 'RIGHT_BACK' as Position, label: 'Lateral Direito' },
-  { value: 'RIGHT_WING' as Position, label: 'Ponta Direita' },
-];
 
 const playersCount = computed(() => playersStore.playersCount);
 
@@ -108,9 +81,18 @@ const filteredPlayers = computed(() => {
 
 const positionFilterLabel = computed(() => {
   if (!selectedPosition.value) return '';
-  const position = positions.find(p => p.value === selectedPosition.value);
-  return position?.label || '';
+  return t(`players.positions.${positionNameMap[selectedPosition.value]}`);
 });
+
+const positionNameMap: Record<Position, string> = {
+  GOALKEEPER: 'goalkeeper',
+  LEFT_WING: 'leftWing',
+  LEFT_BACK: 'leftBack',
+  CENTER_BACK: 'centerBack',
+  PIVOT: 'pivot',
+  RIGHT_BACK: 'rightBack',
+  RIGHT_WING: 'rightWing',
+};
 
 function handleSubmit(formData: any) {
   if (editingPlayer.value) {
@@ -127,7 +109,8 @@ function handleEdit(player: Player) {
 }
 
 function handleDelete(player: Player) {
-  if (confirm(`Tem a certeza que deseja eliminar ${player.firstName} ${player.lastName}?`)) {
+  const message = t('players.confirmDelete', { name: `${player.firstName} ${player.lastName}` });
+  if (confirm(message)) {
     playersStore.deletePlayer(player.id);
   }
 }
@@ -149,40 +132,6 @@ function closeForm() {
 
 .filters-section {
   margin-bottom: var(--spacing-lg);
-}
-
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-sm);
-  background: var(--bg-primary);
-  padding: var(--spacing-md);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--border-color);
-}
-
-.filter-btn {
-  padding: 0.5rem 1rem;
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-sm);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filter-btn:hover {
-  background: var(--bg-tertiary);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-.filter-btn.active {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-  color: white;
 }
 
 .players-grid {

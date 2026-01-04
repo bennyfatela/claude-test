@@ -40,6 +40,7 @@ export interface Player {
   jerseyNumber?: number;
   position: Position;
   dateOfBirth?: string;
+  photo?: string;
   comments?: string;
   createdAt: string;
   updatedAt: string;

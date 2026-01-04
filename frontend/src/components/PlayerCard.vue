@@ -1,8 +1,9 @@
 <template>
   <div class="player-card">
     <div class="player-header">
-      <div class="player-avatar">
-        {{ initials }}
+      <div class="player-avatar" :class="{ 'has-photo': player.photo }">
+        <img v-if="player.photo" :src="player.photo" :alt="`${player.firstName} ${player.lastName}`" class="player-photo" />
+        <span v-else>{{ initials }}</span>
       </div>
       <div class="player-number" v-if="player.jerseyNumber">
         #{{ player.jerseyNumber }}
@@ -30,12 +31,12 @@
     </div>
 
     <div class="player-actions">
-      <button class="action-btn" @click="emit('edit', player)" title="Editar">
+      <button class="action-btn" @click="emit('edit', player)" :title="t('common.edit')">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
           <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
         </svg>
       </button>
-      <button class="action-btn danger" @click="emit('delete', player)" title="Eliminar">
+      <button class="action-btn danger" @click="emit('delete', player)" :title="t('common.delete')">
         <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"/>
         </svg>
@@ -46,6 +47,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { Player } from '../types';
 
 interface Props {
@@ -58,21 +60,14 @@ const emit = defineEmits<{
   delete: [player: Player];
 }>();
 
+const { t, locale } = useI18n();
+
 const initials = computed(() => {
   return `${props.player.firstName[0]}${props.player.lastName[0]}`.toUpperCase();
 });
 
 const positionLabel = computed(() => {
-  const labels: Record<string, string> = {
-    GOALKEEPER: 'GR',
-    LEFT_WING: 'PE',
-    LEFT_BACK: 'LE',
-    CENTER_BACK: 'CT',
-    PIVOT: 'PV',
-    RIGHT_BACK: 'LD',
-    RIGHT_WING: 'PD',
-  };
-  return labels[props.player.position] || props.player.position;
+  return t(`players.positionAbbr.${props.player.position}`);
 });
 
 const positionBadgeClass = computed(() => {
@@ -89,7 +84,8 @@ const positionBadgeClass = computed(() => {
 });
 
 function formatDate(date: string) {
-  return new Date(date).toLocaleDateString('pt-PT');
+  const localeString = locale.value === 'pt' ? 'pt-PT' : 'en-US';
+  return new Date(date).toLocaleDateString(localeString);
 }
 </script>
 
@@ -126,6 +122,19 @@ function formatDate(date: string) {
   justify-content: center;
   font-weight: 700;
   font-size: 1.25rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.player-avatar.has-photo {
+  background: var(--bg-secondary);
+  padding: 0;
+}
+
+.player-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .player-number {

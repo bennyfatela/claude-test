@@ -9,9 +9,9 @@
           </svg>
         </div>
         <div class="stat-content">
-          <p class="stat-label">Total Players</p>
+          <p class="stat-label">{{ t('dashboard.stats.totalPlayers') }}</p>
           <p class="stat-value">{{ playersCount }}</p>
-          <p class="stat-change positive">{{ playersCount > 0 ? 'Ready for season' : 'Add players' }}</p>
+          <p class="stat-change positive">{{ playersCount > 0 ? t('dashboard.stats.readyForSeason') : t('dashboard.stats.addPlayers') }}</p>
         </div>
       </div>
 
@@ -22,9 +22,9 @@
           </svg>
         </div>
         <div class="stat-content">
-          <p class="stat-label">Upcoming Games</p>
+          <p class="stat-label">{{ t('dashboard.stats.upcomingGames') }}</p>
           <p class="stat-value">0</p>
-          <p class="stat-change">No games scheduled</p>
+          <p class="stat-change">{{ t('dashboard.stats.noGamesScheduled') }}</p>
         </div>
       </div>
 
@@ -35,9 +35,9 @@
           </svg>
         </div>
         <div class="stat-content">
-          <p class="stat-label">Training Sessions</p>
+          <p class="stat-label">{{ t('dashboard.stats.trainingSessions') }}</p>
           <p class="stat-value">0</p>
-          <p class="stat-change">This month</p>
+          <p class="stat-change">{{ t('dashboard.stats.thisMonth') }}</p>
         </div>
       </div>
 
@@ -48,9 +48,9 @@
           </svg>
         </div>
         <div class="stat-content">
-          <p class="stat-label">Attendance Rate</p>
+          <p class="stat-label">{{ t('dashboard.stats.attendanceRate') }}</p>
           <p class="stat-value">0%</p>
-          <p class="stat-change">Last 30 days</p>
+          <p class="stat-change">{{ t('dashboard.stats.last30Days') }}</p>
         </div>
       </div>
     </div>
@@ -60,16 +60,16 @@
       <!-- Recent Games -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Recent Games</h3>
-          <router-link to="/games" class="text-sm text-muted">View all</router-link>
+          <h3 class="card-title">{{ t('dashboard.recentGames') }}</h3>
+          <router-link to="/games" class="text-sm text-muted">{{ t('common.viewAll') }}</router-link>
         </div>
         <div class="card-body">
           <div class="empty-state">
             <svg width="48" height="48" viewBox="0 0 20 20" fill="currentColor" class="empty-icon">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/>
             </svg>
-            <p class="empty-text">No games recorded yet</p>
-            <router-link to="/games" class="btn btn-outline">Schedule a game</router-link>
+            <p class="empty-text">{{ t('dashboard.noGamesRecorded') }}</p>
+            <router-link to="/games" class="btn btn-outline">{{ t('dashboard.scheduleGame') }}</router-link>
           </div>
         </div>
       </div>
@@ -77,16 +77,16 @@
       <!-- Upcoming Training -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Upcoming Training</h3>
-          <router-link to="/sessions" class="text-sm text-muted">View all</router-link>
+          <h3 class="card-title">{{ t('dashboard.upcomingTraining') }}</h3>
+          <router-link to="/sessions" class="text-sm text-muted">{{ t('common.viewAll') }}</router-link>
         </div>
         <div class="card-body">
           <div class="empty-state">
             <svg width="48" height="48" viewBox="0 0 20 20" fill="currentColor" class="empty-icon">
               <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"/>
             </svg>
-            <p class="empty-text">No sessions scheduled</p>
-            <router-link to="/sessions" class="btn btn-outline">Add session</router-link>
+            <p class="empty-text">{{ t('dashboard.noSessionsScheduled') }}</p>
+            <router-link to="/sessions" class="btn btn-outline">{{ t('dashboard.addSession') }}</router-link>
           </div>
         </div>
       </div>
@@ -95,7 +95,7 @@
     <!-- Quick Actions -->
     <div class="card mt-4">
       <div class="card-header">
-        <h3 class="card-title">Quick Actions</h3>
+        <h3 class="card-title">{{ t('dashboard.quickActions') }}</h3>
       </div>
       <div class="card-body">
         <div class="quick-actions">
@@ -103,28 +103,28 @@
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"/>
             </svg>
-            <span>Add Player</span>
+            <span>{{ t('dashboard.actions.addPlayer') }}</span>
           </router-link>
 
           <router-link to="/games" class="action-button">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
             </svg>
-            <span>Schedule Game</span>
+            <span>{{ t('dashboard.actions.scheduleGame') }}</span>
           </router-link>
 
           <router-link to="/sessions" class="action-button">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"/>
             </svg>
-            <span>Plan Training</span>
+            <span>{{ t('dashboard.actions.planTraining') }}</span>
           </router-link>
 
           <router-link to="/statistics" class="action-button">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
             </svg>
-            <span>View Statistics</span>
+            <span>{{ t('dashboard.actions.viewStatistics') }}</span>
           </router-link>
         </div>
       </div>
@@ -134,8 +134,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { usePlayersStore } from '../stores/players';
 
+const { t } = useI18n();
 const playersStore = usePlayersStore();
 const playersCount = computed(() => playersStore.playersCount);
 </script>
