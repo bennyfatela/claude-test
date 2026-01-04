@@ -10,8 +10,8 @@
             <circle cx="16" cy="16" r="4" fill="#2563eb"/>
           </svg>
           <div class="logo-text">
-            <h1>Handball</h1>
-            <p>Team Manager</p>
+            <h1>{{ t('app.name') }}</h1>
+            <p>{{ t('app.subtitle') }}</p>
           </div>
         </div>
       </div>
@@ -21,35 +21,35 @@
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
           </svg>
-          <span>Dashboard</span>
+          <span>{{ t('nav.dashboard') }}</span>
         </router-link>
 
         <router-link to="/players" class="nav-item">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
           </svg>
-          <span>Players</span>
+          <span>{{ t('nav.players') }}</span>
         </router-link>
 
         <router-link to="/sessions" class="nav-item">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"/>
           </svg>
-          <span>Training Sessions</span>
+          <span>{{ t('nav.trainingSessions') }}</span>
         </router-link>
 
         <router-link to="/games" class="nav-item">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/>
           </svg>
-          <span>Games</span>
+          <span>{{ t('nav.games') }}</span>
         </router-link>
 
         <router-link to="/statistics" class="nav-item">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
           </svg>
-          <span>Statistics</span>
+          <span>{{ t('nav.statistics') }}</span>
         </router-link>
       </nav>
 
@@ -57,8 +57,8 @@
         <div class="team-info">
           <div class="team-badge">U18</div>
           <div class="team-details">
-            <p class="team-name">Under 18s</p>
-            <p class="team-season">2025 Season</p>
+            <p class="team-name">{{ t('team.name') }}</p>
+            <p class="team-season">{{ t('team.season') }}</p>
           </div>
         </div>
       </div>
@@ -73,7 +73,22 @@
             <span class="breadcrumb-item">{{ currentPageTitle }}</span>
           </div>
           <div class="header-actions">
-            <!-- Placeholder for future actions like notifications, profile -->
+            <div class="language-switcher">
+              <button
+                class="lang-btn"
+                :class="{ active: locale === 'en' }"
+                @click="changeLanguage('en')"
+              >
+                EN
+              </button>
+              <button
+                class="lang-btn"
+                :class="{ active: locale === 'pt' }"
+                @click="changeLanguage('pt')"
+              >
+                PT
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -89,20 +104,27 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { setLocale } from './i18n';
 
 const route = useRoute();
+const { t, locale } = useI18n();
 
 const currentPageTitle = computed(() => {
   const routeMap: Record<string, string> = {
-    'Dashboard': 'Dashboard',
-    'Players': 'Players',
-    'TrainingSessions': 'Training Sessions',
-    'Games': 'Games',
-    'GameDetails': 'Game Details',
-    'Statistics': 'Statistics',
+    'Dashboard': t('nav.dashboard'),
+    'Players': t('nav.players'),
+    'TrainingSessions': t('nav.trainingSessions'),
+    'Games': t('nav.games'),
+    'GameDetails': t('nav.games'),
+    'Statistics': t('nav.statistics'),
   };
-  return routeMap[route.name as string] || 'Dashboard';
+  return routeMap[route.name as string] || t('nav.dashboard');
 });
+
+function changeLanguage(lang: string) {
+  setLocale(lang);
+}
 </script>
 
 <style scoped>
@@ -268,6 +290,39 @@ const currentPageTitle = computed(() => {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.language-switcher {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-sm);
+  padding: 0.25rem;
+  border: 1px solid var(--border-color);
+}
+
+.lang-btn {
+  padding: 0.375rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lang-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.lang-btn.active {
+  background: var(--primary-color);
+  color: white;
 }
 
 .main-content {
