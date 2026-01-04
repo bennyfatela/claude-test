@@ -48,11 +48,17 @@ export interface Player {
 
 export interface TrainingSession {
   id: string;
+  title: string;
   date: string;
   startTime: string;
   endTime?: string;
   location?: string;
+  objective?: string;
   comments?: string;
+  recurringId?: string;
+  recurringPattern?: 'none' | 'weekly' | 'custom';
+  recurringDays?: number[];
+  recurringEndDate?: string;
   createdAt: string;
   updatedAt: string;
 }
