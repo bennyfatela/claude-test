@@ -5,9 +5,31 @@ interface PlayersState {
   players: Player[];
 }
 
+const STORAGE_KEY = 'handball-players';
+
+// Load initial state from localStorage
+function loadPlayersFromStorage(): Player[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error('Failed to load players from storage:', error);
+    return [];
+  }
+}
+
+// Save players to localStorage
+function savePlayersToStorage(players: Player[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
+  } catch (error) {
+    console.error('Failed to save players to storage:', error);
+  }
+}
+
 export const usePlayersStore = defineStore('players', {
   state: (): PlayersState => ({
-    players: [],
+    players: loadPlayersFromStorage(),
   }),
 
   getters: {
@@ -32,6 +54,7 @@ export const usePlayersStore = defineStore('players', {
         updatedAt: new Date().toISOString(),
       };
       this.players.push(newPlayer);
+      savePlayersToStorage(this.players);
       return newPlayer;
     },
 
@@ -43,6 +66,7 @@ export const usePlayersStore = defineStore('players', {
           ...playerData,
           updatedAt: new Date().toISOString(),
         };
+        savePlayersToStorage(this.players);
         return this.players[index];
       }
       return null;
@@ -52,6 +76,7 @@ export const usePlayersStore = defineStore('players', {
       const index = this.players.findIndex((p) => p.id === id);
       if (index !== -1) {
         this.players.splice(index, 1);
+        savePlayersToStorage(this.players);
         return true;
       }
       return false;
