@@ -80,15 +80,12 @@ function clearFilter() {
 .position-filter {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  background: var(--bg-primary);
-  padding: var(--spacing-md);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--border-color);
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
 }
 
 .filter-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: var(--text-secondary);
   white-space: nowrap;
@@ -97,25 +94,25 @@ function clearFilter() {
 .filter-controls {
   display: flex;
   gap: var(--spacing-sm);
-  flex: 1;
+  align-items: center;
 }
 
 .filter-select {
-  flex: 1;
-  padding: 0.5rem 1rem;
+  padding: 0.375rem 0.75rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 200px;
+  min-width: 160px;
+  max-width: 200px;
 }
 
 .clear-filter-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.375rem 0.75rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
@@ -125,6 +122,7 @@ function clearFilter() {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .clear-filter-btn:hover {
