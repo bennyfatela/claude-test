@@ -89,12 +89,12 @@ function getPositionBadgeClass(position: Position): string {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .player-card:hover {
@@ -104,8 +104,8 @@ function getPositionBadgeClass(position: Position): string {
 }
 
 .player-avatar {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   color: white;
@@ -113,7 +113,7 @@ function getPositionBadgeClass(position: Position): string {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.125rem;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
@@ -140,9 +140,9 @@ function getPositionBadgeClass(position: Position): string {
 }
 
 .player-name {
-  font-size: 1.125rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
   color: var(--text-primary);
   line-height: 1.3;
 }
@@ -152,19 +152,20 @@ function getPositionBadgeClass(position: Position): string {
   flex-wrap: wrap;
   gap: var(--spacing-xs);
   justify-content: center;
+  margin-bottom: var(--spacing-xs);
 }
 
 .player-actions {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   width: 100%;
-  padding-top: var(--spacing-md);
+  padding-top: var(--spacing-sm);
   border-top: 1px solid var(--border-color);
 }
 
 .action-btn {
   flex: 1;
-  padding: 0.625rem;
+  padding: 0.5rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);

@@ -163,7 +163,7 @@ const handleCancel = () => {
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   padding: var(--spacing-lg);
   border-top: 1px solid var(--gray-200);
 }
@@ -172,8 +172,12 @@ const handleCancel = () => {
   flex-direction: column;
 }
 
+.modal-footer.vertical .btn {
+  width: 100%;
+}
+
 .btn {
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: 0.625rem 1.25rem;
   border: none;
   border-radius: var(--border-radius);
   font-weight: 500;
@@ -181,6 +185,7 @@ const handleCancel = () => {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-width: 100px;
 }
 
 .btn:hover {
