@@ -113,11 +113,11 @@ const positionNameMap: Record<Position, string> = {
   RIGHT_WING: 'rightWing',
 };
 
-function handleSubmit(formData: any) {
+async function handleSubmit(formData: any) {
   if (editingPlayer.value) {
-    playersStore.updatePlayer(editingPlayer.value.id, formData);
+    await playersStore.updatePlayer(editingPlayer.value.id, formData);
   } else {
-    playersStore.addPlayer(formData);
+    await playersStore.addPlayer(formData);
   }
   closeForm();
 }
@@ -132,9 +132,9 @@ function handleDelete(player: Player) {
   showDeleteDialog.value = true;
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (playerToDelete.value) {
-    playersStore.deletePlayer(playerToDelete.value.id);
+    await playersStore.deletePlayer(playerToDelete.value.id);
     playerToDelete.value = null;
   }
   showDeleteDialog.value = false;

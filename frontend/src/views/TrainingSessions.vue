@@ -133,23 +133,23 @@ const handleDateClick = (date: string) => {
   showSessionForm.value = true;
 };
 
-const handleSubmitSession = (data: Partial<TrainingSession>) => {
+const handleSubmitSession = async (data: Partial<TrainingSession>) => {
   if (editingSession.value) {
     // Update existing session
-    sessionsStore.updateSession(editingSession.value.id, data);
+    await sessionsStore.updateSession(editingSession.value.id, data);
   } else {
     // Create new session(s)
-    sessionsStore.addSession(data as Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>);
+    await sessionsStore.addSession(data as Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>);
   }
   closeSessionForm();
 };
 
-const handleDeleteSession = (sessionId: string) => {
-  sessionsStore.deleteSession(sessionId);
+const handleDeleteSession = async (sessionId: string) => {
+  await sessionsStore.deleteSession(sessionId);
 };
 
-const handleDeleteAllSessions = (recurringId: string) => {
-  sessionsStore.deleteAllRecurringSessions(recurringId);
+const handleDeleteAllSessions = async (recurringId: string) => {
+  await sessionsStore.deleteAllRecurringSessions(recurringId);
 };
 
 const getRecurringCount = (recurringId: string): number => {

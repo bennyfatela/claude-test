@@ -60,31 +60,32 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
       }
     },
 
-    generateSessionTitle(date: string, recurringId?: string): string {
+    generateSessionTitle(date: string, recurringId?: string, isFirstInSeries: boolean = true): string {
+      // Get all sessions sorted by date
       const sortedSessions = [...this.sessions].sort((a, b) => {
         const dateCompare = a.date.localeCompare(b.date);
         if (dateCompare !== 0) return dateCompare;
         return a.startTime.localeCompare(b.startTime);
       });
 
-      if (recurringId) {
-        const existingInSeries = sortedSessions.find((s) => s.recurringId === recurringId);
+      // If this is part of a recurring series and a session in that series already exists with a title, use it
+      if (recurringId && !isFirstInSeries) {
+        const existingInSeries = sortedSessions.find((s) => s.recurringId === recurringId && s.title);
         if (existingInSeries?.title) {
           return existingInSeries.title;
         }
       }
 
+      // Count unique sessions/series (including the new one we're creating)
       const uniqueSessions = new Set<string>();
-      let sessionNumber = 1;
 
       for (const session of sortedSessions) {
-        if (session.date < date) {
-          const key = session.recurringId || session.id;
-          uniqueSessions.add(key);
-        }
+        const key = session.recurringId || session.id;
+        uniqueSessions.add(key);
       }
 
-      sessionNumber = uniqueSessions.size + 1;
+      // Add 1 for the new session we're about to create
+      const sessionNumber = uniqueSessions.size + 1;
       return `Session ${sessionNumber}`;
     },
 
