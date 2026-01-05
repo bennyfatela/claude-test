@@ -73,27 +73,30 @@
           </div>
 
           <div class="form-group">
-            <label for="position">{{ $t('players.form.position') }} *</label>
-            <select id="position" v-model="formData.position" required>
-              <option value="">{{ $t('players.form.selectPosition') }}</option>
-              <option value="GOALKEEPER">{{ $t('players.positions.GOALKEEPER') }}</option>
-              <option value="LEFT_WING">{{ $t('players.positions.LEFT_WING') }}</option>
-              <option value="LEFT_BACK">{{ $t('players.positions.LEFT_BACK') }}</option>
-              <option value="CENTER_BACK">{{ $t('players.positions.CENTER_BACK') }}</option>
-              <option value="PIVOT">{{ $t('players.positions.PIVOT') }}</option>
-              <option value="RIGHT_BACK">{{ $t('players.positions.RIGHT_BACK') }}</option>
-              <option value="RIGHT_WING">{{ $t('players.positions.RIGHT_WING') }}</option>
-            </select>
+            <label for="dateOfBirth">{{ $t('players.form.dateOfBirth') }}</label>
+            <input
+              id="dateOfBirth"
+              v-model="formData.dateOfBirth"
+              type="date"
+            />
           </div>
         </div>
 
         <div class="form-group">
-          <label for="dateOfBirth">{{ $t('players.form.dateOfBirth') }}</label>
-          <input
-            id="dateOfBirth"
-            v-model="formData.dateOfBirth"
-            type="date"
-          />
+          <label>{{ $t('players.form.positions') }} *</label>
+          <div class="chip-grid">
+            <button
+              v-for="pos in positionOptions"
+              :key="pos.value"
+              type="button"
+              class="chip"
+              :class="{ 'chip-active': formData.positions.includes(pos.value) }"
+              @click="togglePosition(pos.value)"
+            >
+              {{ pos.label }}
+            </button>
+          </div>
+          <p v-if="formData.positions.length === 0" class="error-text">{{ $t('players.form.selectAtLeastOnePosition') }}</p>
         </div>
 
         <div class="form-group">
@@ -110,7 +113,7 @@
           <button type="button" class="btn btn-outline" @click="emit('close')">
             {{ $t('players.form.cancel') }}
           </button>
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary" :disabled="formData.positions.length === 0">
             {{ isEdit ? $t('players.form.save') : $t('players.form.add') }}
           </button>
         </div>
@@ -120,7 +123,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { reactive, ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { Player, Position } from '../types';
 
 interface Props {
@@ -131,7 +135,7 @@ interface FormData {
   firstName: string;
   lastName: string;
   jerseyNumber: number | null;
-  position: Position | '';
+  positions: Position[];
   dateOfBirth: string;
   photo: string;
   comments: string;
@@ -143,23 +147,50 @@ const emit = defineEmits<{
   submit: [data: FormData];
 }>();
 
+const { t } = useI18n();
 const isEdit = !!props.player;
 
 const formData = reactive<FormData>({
   firstName: props.player?.firstName || '',
   lastName: props.player?.lastName || '',
   jerseyNumber: props.player?.jerseyNumber || null,
-  position: props.player?.position || '',
+  positions: props.player?.positions || [],
   dateOfBirth: props.player?.dateOfBirth || '',
   photo: props.player?.photo || '',
   comments: props.player?.comments || '',
 });
 
-const photoPreview = ref(formData.photo);
+const photoPreview = ref<string>(formData.photo);
+
+const positionNameMap: Record<Position, string> = {
+  GOALKEEPER: 'goalkeeper',
+  LEFT_WING: 'leftWing',
+  LEFT_BACK: 'leftBack',
+  CENTER_BACK: 'centerBack',
+  PIVOT: 'pivot',
+  RIGHT_BACK: 'rightBack',
+  RIGHT_WING: 'rightWing',
+};
+
+const positionOptions = computed(() => {
+  return Object.entries(positionNameMap).map(([value, key]) => ({
+    value: value as Position,
+    label: t(`players.positions.${key}`),
+  }));
+});
+
+function togglePosition(position: Position) {
+  const index = formData.positions.indexOf(position);
+  if (index > -1) {
+    formData.positions.splice(index, 1);
+  } else {
+    formData.positions.push(position);
+  }
+}
 
 function handlePhotoChange(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const file = input.files?.[0];
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
 
   if (file) {
     const reader = new FileReader();
@@ -173,14 +204,20 @@ function handlePhotoChange(event: Event) {
 }
 
 function handleSubmit() {
-  emit('submit', formData);
+  if (formData.positions.length === 0) {
+    return;
+  }
+  emit('submit', { ...formData });
 }
 </script>
 
 <style scoped>
 .modal-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
@@ -192,11 +229,11 @@ function handleSubmit() {
 .modal-content {
   background: var(--bg-primary);
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-lg);
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: var(--shadow-lg);
 }
 
 .modal-header {
@@ -210,23 +247,25 @@ function handleSubmit() {
 .modal-header h3 {
   margin: 0;
   font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .close-btn {
-  padding: 0.5rem;
-  background: transparent;
+  background: none;
   border: none;
-  border-radius: var(--border-radius-sm);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  padding: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--border-radius-sm);
+  transition: all 0.2s;
 }
 
 .close-btn:hover {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   color: var(--text-primary);
 }
 
@@ -239,9 +278,8 @@ function handleSubmit() {
   align-items: center;
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
-  padding: var(--spacing-lg);
-  background: var(--bg-secondary);
-  border-radius: var(--border-radius);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .photo-preview {
@@ -249,7 +287,7 @@ function handleSubmit() {
   height: 100px;
   border-radius: 50%;
   overflow: hidden;
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,36 +301,137 @@ function handleSubmit() {
 }
 
 .photo-placeholder {
-  color: var(--text-light);
-}
-
-.photo-actions {
-  flex: 1;
+  color: var(--text-muted);
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.chip {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-lg);
+  border: 2px solid var(--gray-300);
+  background: white;
+  color: var(--gray-700);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  background-color: var(--gray-50);
+  border-color: var(--gray-400);
+  transform: translateY(-1px);
+}
+
+.chip-active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.chip-active:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.error-text {
+  color: var(--danger-color);
+  font-size: 0.8125rem;
+  margin: 0.25rem 0 0 0;
 }
 
 .modal-footer {
   display: flex;
-  justify-content: flex-end;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-lg);
   padding-top: var(--spacing-lg);
   border-top: 1px solid var(--border-color);
 }
 
-@media (max-width: 640px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
+.btn {
+  flex: 1;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
 
-  .photo-upload-section {
-    flex-direction: column;
-    text-align: center;
-  }
+.btn-outline {
+  background: white;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-outline:hover {
+  background: var(--bg-secondary);
+  border-color: var(--gray-400);
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

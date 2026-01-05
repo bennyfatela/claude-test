@@ -51,7 +51,7 @@ export interface Player {
   firstName: string;
   lastName: string;
   jerseyNumber?: number;
-  position: Position;
+  positions: Position[];
   dateOfBirth?: string;
   photo?: string;
   comments?: string;

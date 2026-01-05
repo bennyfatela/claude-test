@@ -8,7 +8,7 @@ export const CREATE_PLAYER = gql`
       firstName
       lastName
       jerseyNumber
-      position
+      positions
       dateOfBirth
       photo
       comments
@@ -25,7 +25,7 @@ export const UPDATE_PLAYER = gql`
       firstName
       lastName
       jerseyNumber
-      position
+      positions
       dateOfBirth
       photo
       comments

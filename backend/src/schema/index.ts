@@ -54,7 +54,7 @@ export const typeDefs = gql`
     firstName: String!
     lastName: String!
     jerseyNumber: Int
-    position: Position!
+    positions: [Position!]!
     dateOfBirth: String
     photo: String
     comments: String
@@ -151,7 +151,7 @@ export const typeDefs = gql`
     firstName: String!
     lastName: String!
     jerseyNumber: Int
-    position: Position!
+    positions: [Position!]!
     dateOfBirth: String
     photo: String
     comments: String

@@ -8,7 +8,7 @@ export const GET_PLAYERS = gql`
       firstName
       lastName
       jerseyNumber
-      position
+      positions
       dateOfBirth
       photo
       comments
@@ -25,7 +25,7 @@ export const GET_PLAYER = gql`
       firstName
       lastName
       jerseyNumber
-      position
+      positions
       dateOfBirth
       photo
       comments

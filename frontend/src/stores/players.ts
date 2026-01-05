@@ -24,7 +24,7 @@ export const usePlayersStore = defineStore('players', {
 
     getPlayersByPosition: (state) => (position: Position | null) => {
       if (!position) return state.players;
-      return state.players.filter((player) => player.position === position);
+      return state.players.filter((player) => player.positions.includes(position));
     },
 
     playersCount: (state) => state.players.length,

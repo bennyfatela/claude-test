@@ -23,7 +23,7 @@ export interface Player {
   firstName: string;
   lastName: string;
   jerseyNumber?: number;
-  position: string;
+  positions: string[];
   dateOfBirth?: string;
   photo?: string;
   comments?: string;

@@ -136,12 +136,14 @@
       @cancel="showDeleteModal = false"
     >
       <template v-if="isRecurring" #footer>
-        <button class="btn btn-secondary" @click="deleteThisInstance">
-          {{ t('trainingSessions.deleteThisInstance') }}
-        </button>
-        <button class="btn btn-danger" @click="deleteAllInstances">
-          {{ t('trainingSessions.deleteAllInstances') }} ({{ recurringCount }})
-        </button>
+        <div class="modal-footer-vertical">
+          <button class="btn btn-secondary" @click="deleteThisInstance">
+            {{ t('trainingSessions.deleteThisInstance') }}
+          </button>
+          <button class="btn btn-danger" @click="deleteAllInstances">
+            {{ t('trainingSessions.deleteAllInstances') }} ({{ recurringCount }})
+          </button>
+        </div>
       </template>
     </ConfirmDialog>
   </div>
@@ -437,5 +439,16 @@ const confirmDelete = () => {
   --red-300: #fca5a5;
   --red-600: #dc2626;
   --red-700: #b91c1c;
+}
+
+.modal-footer-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.modal-footer-vertical .btn {
+  width: 100%;
 }
 </style>
