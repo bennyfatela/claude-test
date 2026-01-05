@@ -94,6 +94,6 @@ export const DELETE_TRAINING_SESSION = gql`
 
 export const DELETE_TRAINING_SESSIONS_BY_RECURRING_ID = gql`
   mutation DeleteTrainingSessionsByRecurringId($recurringId: ID!) {
-    deleteTrainingSessionsByRecurringId(recurringId: recurringId)
+    deleteTrainingSessionsByRecurringId(recurringId: $recurringId)
   }
 `;

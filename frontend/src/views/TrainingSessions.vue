@@ -134,22 +134,42 @@ const handleDateClick = (date: string) => {
 };
 
 const handleSubmitSession = async (data: Partial<TrainingSession>) => {
-  if (editingSession.value) {
-    // Update existing session
-    await sessionsStore.updateSession(editingSession.value.id, data);
-  } else {
-    // Create new session(s)
-    await sessionsStore.addSession(data as Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>);
+  try {
+    console.log('Submitting session with data:', data);
+    if (editingSession.value) {
+      // Update existing session
+      await sessionsStore.updateSession(editingSession.value.id, data);
+    } else {
+      // Create new session(s)
+      await sessionsStore.addSession(data as Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>);
+    }
+    // Explicitly refresh sessions to update UI
+    await sessionsStore.fetchTrainingSessions();
+  } catch (error) {
+    console.error('Error submitting session:', error);
+  } finally {
+    closeSessionForm();
   }
-  closeSessionForm();
 };
 
 const handleDeleteSession = async (sessionId: string) => {
-  await sessionsStore.deleteSession(sessionId);
+  try {
+    await sessionsStore.deleteSession(sessionId);
+    // Explicitly refresh sessions to update UI
+    await sessionsStore.fetchTrainingSessions();
+  } catch (error) {
+    console.error('Error deleting session:', error);
+  }
 };
 
 const handleDeleteAllSessions = async (recurringId: string) => {
-  await sessionsStore.deleteAllRecurringSessions(recurringId);
+  try {
+    await sessionsStore.deleteAllRecurringSessions(recurringId);
+    // Explicitly refresh sessions to update UI
+    await sessionsStore.fetchTrainingSessions();
+  } catch (error) {
+    console.error('Error deleting recurring sessions:', error);
+  }
 };
 
 const getRecurringCount = (recurringId: string): number => {

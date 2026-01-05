@@ -92,27 +92,36 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
     async addSession(sessionData: Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>) {
       this.loading = true;
       this.error = null;
-      
+
       try {
+        console.log('addSession called with:', sessionData);
+        console.log('recurringPattern:', sessionData.recurringPattern);
+        console.log('recurringEndDate:', sessionData.recurringEndDate);
+
         // If recurring, generate multiple sessions
         if (sessionData.recurringPattern && sessionData.recurringPattern !== 'none' && sessionData.recurringEndDate) {
+          console.log('Creating recurring sessions');
           const recurringId = crypto.randomUUID();
           const sessions = this.generateRecurringSessions(sessionData, recurringId);
+          console.log(`Generated ${sessions.length} sessions`);
           const firstSessionDate = sessions.length > 0 ? sessions[0].date : sessionData.date;
           const title = this.generateSessionTitle(firstSessionDate, recurringId);
 
           // Create all sessions via GraphQL
-          for (const session of sessions) {
+          for (let i = 0; i < sessions.length; i++) {
+            console.log(`Creating session ${i + 1}/${sessions.length}:`, sessions[i]);
             const { data } = await apolloClient.mutate({
               mutation: CREATE_TRAINING_SESSION,
               variables: {
-                input: { ...session, title },
+                input: { ...sessions[i], title },
               },
             });
             this.sessions.push(data.createTrainingSession);
           }
+          console.log('All recurring sessions created successfully');
           return sessions;
         } else {
+          console.log('Creating single session');
           // Single session
           const title = this.generateSessionTitle(sessionData.date);
           const { data } = await apolloClient.mutate({

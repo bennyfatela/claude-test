@@ -53,7 +53,12 @@ class Database {
   // Players
   getPlayers(): Player[] {
     const data = fs.readFileSync(PLAYERS_FILE, 'utf-8');
-    return JSON.parse(data);
+    const players = JSON.parse(data);
+    // Ensure all players have positions as an array
+    return players.map((p: any) => ({
+      ...p,
+      positions: Array.isArray(p.positions) ? p.positions : [],
+    }));
   }
 
   getPlayer(id: string): Player | null {
@@ -67,6 +72,8 @@ class Database {
     const newPlayer: Player = {
       id: this.generateId(),
       ...player,
+      // Ensure positions is always an array, never null or undefined
+      positions: Array.isArray(player.positions) ? player.positions : [],
       createdAt: now,
       updatedAt: now,
     };
@@ -80,9 +87,15 @@ class Database {
     const index = players.findIndex(p => p.id === id);
     if (index === -1) return null;
 
+    // Ensure positions is always an array, never null or undefined
+    const updatedData = { ...data };
+    if ('positions' in updatedData && !Array.isArray(updatedData.positions)) {
+      updatedData.positions = [];
+    }
+
     players[index] = {
       ...players[index],
-      ...data,
+      ...updatedData,
       id,
       updatedAt: new Date().toISOString(),
     };
