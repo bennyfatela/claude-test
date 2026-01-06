@@ -26,6 +26,17 @@ export default {
     search: 'Search',
     filter: 'Filter',
     viewAll: 'View all',
+    loading: 'Loading',
+    saving: 'Saving',
+  },
+  attendance: {
+    markAttendance: 'Mark Attendance',
+    present: 'Present',
+    absent: 'Absent',
+    late: 'Late',
+    excused: 'Excused',
+    total: 'Total',
+    noPlayers: 'No players to mark attendance for',
   },
   players: {
     title: 'Players',

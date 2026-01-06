@@ -4,6 +4,7 @@ import * as path from 'path';
 const DB_DIR = path.join(__dirname, '../../data');
 const PLAYERS_FILE = path.join(DB_DIR, 'players.json');
 const SESSIONS_FILE = path.join(DB_DIR, 'training-sessions.json');
+const ATTENDANCE_FILE = path.join(DB_DIR, 'attendance.json');
 
 // Ensure data directory exists
 if (!fs.existsSync(DB_DIR)) {
@@ -16,6 +17,9 @@ if (!fs.existsSync(PLAYERS_FILE)) {
 }
 if (!fs.existsSync(SESSIONS_FILE)) {
   fs.writeFileSync(SESSIONS_FILE, JSON.stringify([], null, 2));
+}
+if (!fs.existsSync(ATTENDANCE_FILE)) {
+  fs.writeFileSync(ATTENDANCE_FILE, JSON.stringify([], null, 2));
 }
 
 export interface Player {
@@ -47,6 +51,16 @@ export interface TrainingSession {
   recurringEndDate?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  playerId: string;
+  sessionId: string;
+  sessionType: 'TRAINING' | 'GAME';
+  status: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+  notes?: string;
+  createdAt: string;
 }
 
 class Database {
@@ -199,6 +213,79 @@ class Database {
     const deletedCount = sessions.length - filtered.length;
     fs.writeFileSync(SESSIONS_FILE, JSON.stringify(filtered, null, 2));
     return deletedCount;
+  }
+
+  // Attendance
+  getAttendanceRecords(sessionId?: string, playerId?: string): AttendanceRecord[] {
+    try {
+      const data = fs.readFileSync(ATTENDANCE_FILE, 'utf-8');
+      if (!data || data.trim() === '') {
+        fs.writeFileSync(ATTENDANCE_FILE, JSON.stringify([], null, 2));
+        return [];
+      }
+      let records = JSON.parse(data);
+
+      if (sessionId) {
+        records = records.filter((r: AttendanceRecord) => r.sessionId === sessionId);
+      }
+      if (playerId) {
+        records = records.filter((r: AttendanceRecord) => r.playerId === playerId);
+      }
+
+      return records;
+    } catch (error) {
+      console.error('Error reading attendance file:', error);
+      if (fs.existsSync(ATTENDANCE_FILE)) {
+        const backupFile = ATTENDANCE_FILE + '.backup.' + Date.now();
+        fs.copyFileSync(ATTENDANCE_FILE, backupFile);
+        console.log(`Corrupted file backed up to ${backupFile}`);
+      }
+      fs.writeFileSync(ATTENDANCE_FILE, JSON.stringify([], null, 2));
+      return [];
+    }
+  }
+
+  recordAttendance(input: Omit<AttendanceRecord, 'id' | 'createdAt'>): AttendanceRecord {
+    const records = this.getAttendanceRecords();
+
+    // Check if attendance already exists for this player and session
+    const existingIndex = records.findIndex(
+      r => r.playerId === input.playerId && r.sessionId === input.sessionId
+    );
+
+    if (existingIndex !== -1) {
+      // Update existing record
+      records[existingIndex] = {
+        ...records[existingIndex],
+        ...input,
+      };
+      fs.writeFileSync(ATTENDANCE_FILE, JSON.stringify(records, null, 2));
+      return records[existingIndex];
+    }
+
+    // Create new record
+    const newRecord: AttendanceRecord = {
+      id: this.generateId(),
+      ...input,
+      createdAt: new Date().toISOString(),
+    };
+    records.push(newRecord);
+    fs.writeFileSync(ATTENDANCE_FILE, JSON.stringify(records, null, 2));
+    return newRecord;
+  }
+
+  updateAttendance(id: string, status: string, notes?: string): AttendanceRecord | null {
+    const records = this.getAttendanceRecords();
+    const index = records.findIndex(r => r.id === id);
+    if (index === -1) return null;
+
+    records[index] = {
+      ...records[index],
+      status: status as any,
+      notes: notes || records[index].notes,
+    };
+    fs.writeFileSync(ATTENDANCE_FILE, JSON.stringify(records, null, 2));
+    return records[index];
   }
 
   private generateId(): string {

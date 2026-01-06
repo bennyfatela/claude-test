@@ -97,3 +97,32 @@ export const DELETE_TRAINING_SESSIONS_BY_RECURRING_ID = gql`
     deleteTrainingSessionsByRecurringId(recurringId: $recurringId)
   }
 `;
+
+// Attendance Mutations
+export const RECORD_ATTENDANCE = gql`
+  mutation RecordAttendance($input: AttendanceInput!) {
+    recordAttendance(input: $input) {
+      id
+      playerId
+      sessionId
+      sessionType
+      status
+      notes
+      createdAt
+    }
+  }
+`;
+
+export const UPDATE_ATTENDANCE = gql`
+  mutation UpdateAttendance($id: ID!, $status: AttendanceStatus!, $notes: String) {
+    updateAttendance(id: $id, status: $status, notes: $notes) {
+      id
+      playerId
+      sessionId
+      sessionType
+      status
+      notes
+      createdAt
+    }
+  }
+`;

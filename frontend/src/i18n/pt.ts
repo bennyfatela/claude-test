@@ -26,6 +26,17 @@ export default {
     search: 'Pesquisar',
     filter: 'Filtrar',
     viewAll: 'Ver tudo',
+    loading: 'A carregar',
+    saving: 'A guardar',
+  },
+  attendance: {
+    markAttendance: 'Marcar Presenças',
+    present: 'Presente',
+    absent: 'Ausente',
+    late: 'Atrasado',
+    excused: 'Falta justificada',
+    total: 'Total',
+    noPlayers: 'Não há jogadores para marcar presenças',
   },
   players: {
     title: 'Jogadores',

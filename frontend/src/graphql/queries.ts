@@ -79,3 +79,18 @@ export const GET_TRAINING_SESSION = gql`
     }
   }
 `;
+
+// Attendance Queries
+export const GET_ATTENDANCE_RECORDS = gql`
+  query GetAttendanceRecords($sessionId: ID, $playerId: ID) {
+    attendanceRecords(sessionId: $sessionId, playerId: $playerId) {
+      id
+      playerId
+      sessionId
+      sessionType
+      status
+      notes
+      createdAt
+    }
+  }
+`;

@@ -10,13 +10,16 @@ export const resolvers = {
     trainingSessions: () => db.getTrainingSessions(),
     trainingSession: (_: any, { id }: { id: string }) => db.getTrainingSession(id),
 
+    // Attendance
+    attendanceRecords: (_: any, { sessionId, playerId }: { sessionId?: string; playerId?: string }) =>
+      db.getAttendanceRecords(sessionId, playerId),
+
     // Not yet implemented
     games: () => [],
     game: () => null,
     drills: () => [],
     drillTemplates: () => [],
     drill: () => null,
-    attendanceRecords: () => [],
     gameEvents: () => [],
     statistics: () => [],
   },
@@ -52,6 +55,15 @@ export const resolvers = {
       return db.deleteTrainingSessionsByRecurringId(recurringId);
     },
 
+    // Attendance mutations
+    recordAttendance: (_: any, { input }: { input: any }) => {
+      return db.recordAttendance(input);
+    },
+
+    updateAttendance: (_: any, { id, status, notes }: { id: string; status: string; notes?: string }) => {
+      return db.updateAttendance(id, status, notes);
+    },
+
     // Not yet implemented
     createGame: () => null,
     updateGame: () => null,
@@ -59,8 +71,6 @@ export const resolvers = {
     createDrill: () => null,
     updateDrill: () => null,
     deleteDrill: () => false,
-    recordAttendance: () => null,
-    updateAttendance: () => null,
     createGameEvent: () => null,
     updateGameEvent: () => null,
     deleteGameEvent: () => false,
