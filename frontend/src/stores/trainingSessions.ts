@@ -151,11 +151,11 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
           const sessions = this.generateRecurringSessions(sessionData, recurringId);
           console.log(`Generated ${sessions.length} sessions`);
 
-          // Create all sessions via GraphQL - each gets its own title based on when it occurs
-          for (let i = 0; i < sessions.length; i++) {
-            const sessionToCreate = sessions[i];
+          // Create all sessions via GraphQL in parallel - each gets its own title based on when it occurs
+          console.log('Creating sessions in parallel...');
+          const createPromises = sessions.map(async (sessionToCreate, index) => {
             const title = this.generateSessionTitle(sessionToCreate.date, sessionToCreate.startTime);
-            console.log(`Creating session ${i + 1}/${sessions.length}:`, sessionToCreate, 'with title:', title);
+            console.log(`Creating session ${index + 1}/${sessions.length}:`, sessionToCreate, 'with title:', title);
             const { data } = await apolloClient.mutate({
               mutation: CREATE_TRAINING_SESSION,
               variables: {
@@ -163,14 +163,16 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
               },
             });
             // Create a copy with mutable arrays to avoid frozen array issues
-            const session = {
+            return {
               ...data.createTrainingSession,
               objectives: data.createTrainingSession.objectives ? [...data.createTrainingSession.objectives] : [],
               components: data.createTrainingSession.components ? [...data.createTrainingSession.components] : [],
               recurringDays: data.createTrainingSession.recurringDays ? [...data.createTrainingSession.recurringDays] : [],
             };
-            this.sessions.push(session);
-          }
+          });
+
+          const createdSessions = await Promise.all(createPromises);
+          this.sessions.push(...createdSessions);
           console.log('All recurring sessions created successfully');
           return sessions;
         } else {
