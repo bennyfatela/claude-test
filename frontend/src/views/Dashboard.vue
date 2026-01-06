@@ -164,12 +164,12 @@ const sessionsStore = useTrainingSessionsStore();
 const playersCount = computed(() => playersStore.playersCount);
 const sessionsCount = computed(() => sessionsStore.sessionsCount);
 
-// Get upcoming sessions (next 5 sessions from today)
+// Get upcoming sessions (next 3 sessions from today)
 const upcomingSessions = computed(() => {
   const today = new Date().toISOString().split('T')[0];
   return sessionsStore.getAllSessions
     .filter(session => session.date >= today)
-    .slice(0, 5);
+    .slice(0, 3);
 });
 
 const formatDay = (dateString: string) => {
