@@ -97,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTrainingSessionsStore } from '../stores/trainingSessions';
 import TrainingSessionCard from '../components/TrainingSessionCard.vue';
@@ -107,6 +107,11 @@ import type { TrainingSession } from '../types';
 
 const { t } = useI18n();
 const sessionsStore = useTrainingSessionsStore();
+
+// Fetch sessions when component mounts
+onMounted(() => {
+  sessionsStore.fetchTrainingSessions();
+});
 
 const viewMode = ref<'list' | 'calendar'>('list');
 const showSessionForm = ref(false);
