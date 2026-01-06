@@ -52,13 +52,30 @@ export interface TrainingSession {
 class Database {
   // Players
   getPlayers(): Player[] {
-    const data = fs.readFileSync(PLAYERS_FILE, 'utf-8');
-    const players = JSON.parse(data);
-    // Ensure all players have positions as an array
-    return players.map((p: any) => ({
-      ...p,
-      positions: Array.isArray(p.positions) ? p.positions : [],
-    }));
+    try {
+      const data = fs.readFileSync(PLAYERS_FILE, 'utf-8');
+      if (!data || data.trim() === '') {
+        // If file is empty, return empty array and reinitialize file
+        fs.writeFileSync(PLAYERS_FILE, JSON.stringify([], null, 2));
+        return [];
+      }
+      const players = JSON.parse(data);
+      // Ensure all players have positions as an array
+      return players.map((p: any) => ({
+        ...p,
+        positions: Array.isArray(p.positions) ? p.positions : [],
+      }));
+    } catch (error) {
+      console.error('Error reading players file:', error);
+      // If file is corrupted, backup and reinitialize
+      if (fs.existsSync(PLAYERS_FILE)) {
+        const backupFile = PLAYERS_FILE + '.backup.' + Date.now();
+        fs.copyFileSync(PLAYERS_FILE, backupFile);
+        console.log(`Corrupted file backed up to ${backupFile}`);
+      }
+      fs.writeFileSync(PLAYERS_FILE, JSON.stringify([], null, 2));
+      return [];
+    }
   }
 
   getPlayer(id: string): Player | null {
@@ -113,8 +130,25 @@ class Database {
 
   // Training Sessions
   getTrainingSessions(): TrainingSession[] {
-    const data = fs.readFileSync(SESSIONS_FILE, 'utf-8');
-    return JSON.parse(data);
+    try {
+      const data = fs.readFileSync(SESSIONS_FILE, 'utf-8');
+      if (!data || data.trim() === '') {
+        // If file is empty, return empty array and reinitialize file
+        fs.writeFileSync(SESSIONS_FILE, JSON.stringify([], null, 2));
+        return [];
+      }
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Error reading training sessions file:', error);
+      // If file is corrupted, backup and reinitialize
+      if (fs.existsSync(SESSIONS_FILE)) {
+        const backupFile = SESSIONS_FILE + '.backup.' + Date.now();
+        fs.copyFileSync(SESSIONS_FILE, backupFile);
+        console.log(`Corrupted file backed up to ${backupFile}`);
+      }
+      fs.writeFileSync(SESSIONS_FILE, JSON.stringify([], null, 2));
+      return [];
+    }
   }
 
   getTrainingSession(id: string): TrainingSession | null {
