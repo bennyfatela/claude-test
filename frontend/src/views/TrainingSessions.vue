@@ -142,6 +142,8 @@ const handleSubmitSession = async (data: Partial<TrainingSession>) => {
     } else {
       // Create new session(s)
       await sessionsStore.addSession(data as Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>);
+      // Renumber all sessions to maintain chronological order
+      await sessionsStore.renumberAllSessions();
     }
     // Explicitly refresh sessions to update UI
     await sessionsStore.fetchTrainingSessions();
@@ -155,6 +157,8 @@ const handleSubmitSession = async (data: Partial<TrainingSession>) => {
 const handleDeleteSession = async (sessionId: string) => {
   try {
     await sessionsStore.deleteSession(sessionId);
+    // Renumber all sessions to maintain chronological order
+    await sessionsStore.renumberAllSessions();
     // Explicitly refresh sessions to update UI
     await sessionsStore.fetchTrainingSessions();
   } catch (error) {
@@ -165,6 +169,8 @@ const handleDeleteSession = async (sessionId: string) => {
 const handleDeleteAllSessions = async (recurringId: string) => {
   try {
     await sessionsStore.deleteAllRecurringSessions(recurringId);
+    // Renumber all sessions to maintain chronological order
+    await sessionsStore.renumberAllSessions();
     // Explicitly refresh sessions to update UI
     await sessionsStore.fetchTrainingSessions();
   } catch (error) {

@@ -132,18 +132,17 @@
       :message="isRecurring ? t('trainingSessions.deleteRecurringMessage') : t('trainingSessions.confirmDeleteMessage')"
       :danger="true"
       :confirmText="t('common.delete')"
+      :verticalButtons="isRecurring"
       @confirm="confirmDelete"
       @cancel="showDeleteModal = false"
     >
       <template v-if="isRecurring" #footer>
-        <div class="modal-footer-vertical">
-          <button class="btn btn-secondary" @click="deleteThisInstance">
-            {{ t('trainingSessions.deleteThisInstance') }}
-          </button>
-          <button class="btn btn-danger" @click="deleteAllInstances">
-            {{ t('trainingSessions.deleteAllInstances') }} ({{ recurringCount }})
-          </button>
-        </div>
+        <button class="btn btn-dialog btn-secondary" @click="deleteThisInstance">
+          {{ t('trainingSessions.deleteThisInstance') }}
+        </button>
+        <button class="btn btn-dialog btn-danger" @click="deleteAllInstances">
+          {{ t('trainingSessions.deleteAllInstances') }} ({{ recurringCount }})
+        </button>
       </template>
     </ConfirmDialog>
   </div>
@@ -399,56 +398,34 @@ const confirmDelete = () => {
   line-height: 1.5;
 }
 
-.btn {
-  padding: var(--spacing-sm) var(--spacing-md);
+.btn-dialog {
+  padding: 0.625rem 1.25rem;
   border: none;
   border-radius: var(--border-radius);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
+  width: 100%;
 }
 
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
-}
-
-.btn-secondary {
+.btn-dialog.btn-secondary {
   background-color: white;
   color: var(--gray-700);
   border: 1px solid var(--gray-300);
 }
 
-.btn-secondary:hover {
+.btn-dialog.btn-secondary:hover {
   background-color: var(--gray-50);
   border-color: var(--gray-400);
 }
 
-.btn-danger {
-  background-color: var(--red-600);
+.btn-dialog.btn-danger {
+  background-color: var(--danger-color);
   color: white;
 }
 
-.btn-danger:hover {
-  background-color: var(--red-700);
-}
-
-:root {
-  --red-50: #fef2f2;
-  --red-300: #fca5a5;
-  --red-600: #dc2626;
-  --red-700: #b91c1c;
-}
-
-.modal-footer-vertical {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  width: 100%;
-}
-
-.modal-footer-vertical .btn {
-  width: 100%;
+.btn-dialog.btn-danger:hover {
+  background-color: var(--danger-hover);
 }
 </style>

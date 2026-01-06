@@ -66,7 +66,7 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
       }
     },
 
-    generateSessionTitle(date: string, recurringId?: string, isFirstInSeries: boolean = true): string {
+    generateSessionTitle(date: string, recurringId?: string): string {
       // Get all sessions sorted by date
       const sortedSessions = [...this.sessions].sort((a, b) => {
         const dateCompare = a.date.localeCompare(b.date);
@@ -74,25 +74,81 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
         return a.startTime.localeCompare(b.startTime);
       });
 
-      // If this is part of a recurring series and a session in that series already exists with a title, use it
-      if (recurringId && !isFirstInSeries) {
-        const existingInSeries = sortedSessions.find((s) => s.recurringId === recurringId && s.title);
+      // If this is part of a recurring series and a session in that series already exists, use that title
+      if (recurringId) {
+        const existingInSeries = sortedSessions.find((s) => s.recurringId === recurringId);
         if (existingInSeries?.title) {
           return existingInSeries.title;
         }
       }
 
-      // Count unique sessions/series (including the new one we're creating)
+      // Count unique sessions/series that come before or at the same time as this date
       const uniqueSessions = new Set<string>();
+      const targetDate = new Date(date);
 
       for (const session of sortedSessions) {
-        const key = session.recurringId || session.id;
-        uniqueSessions.add(key);
+        const sessionDate = new Date(session.date);
+        // Include sessions up to and including the target date
+        if (sessionDate <= targetDate) {
+          const key = session.recurringId || session.id;
+          uniqueSessions.add(key);
+        }
       }
 
       // Add 1 for the new session we're about to create
       const sessionNumber = uniqueSessions.size + 1;
       return `Session ${sessionNumber}`;
+    },
+
+    async renumberAllSessions() {
+      // Sort all sessions by date and time
+      const sortedSessions = [...this.sessions].sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return a.startTime.localeCompare(b.startTime);
+      });
+
+      // Track which recurring series we've already numbered
+      const numberedSeries = new Map<string, string>();
+      let sessionCounter = 1;
+
+      // Renumber sessions in chronological order
+      for (const session of sortedSessions) {
+        const key = session.recurringId || session.id;
+
+        let newTitle: string;
+        if (session.recurringId && numberedSeries.has(session.recurringId)) {
+          // Use the same title as the first session in this recurring series
+          newTitle = numberedSeries.get(session.recurringId)!;
+        } else {
+          // Assign a new number
+          newTitle = `Session ${sessionCounter}`;
+          if (session.recurringId) {
+            numberedSeries.set(session.recurringId, newTitle);
+          }
+          sessionCounter++;
+        }
+
+        // Update title if it changed
+        if (session.title !== newTitle) {
+          try {
+            await apolloClient.mutate({
+              mutation: UPDATE_TRAINING_SESSION,
+              variables: {
+                id: session.id,
+                input: { title: newTitle },
+              },
+            });
+            // Update local store
+            const index = this.sessions.findIndex((s) => s.id === session.id);
+            if (index !== -1) {
+              this.sessions[index].title = newTitle;
+            }
+          } catch (error) {
+            console.error('Error renumbering session:', error);
+          }
+        }
+      }
     },
 
     async addSession(sessionData: Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>) {
