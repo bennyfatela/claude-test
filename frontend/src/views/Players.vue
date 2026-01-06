@@ -4,7 +4,7 @@
       <div>
         <p class="text-muted text-sm mb-2">{{ t('players.subtitle') }}</p>
         <p class="text-sm text-muted" v-if="playersCount > 0">
-          {{ playersCount }} {{ playersCount === 1 ? t('players.playerCount', { count: 1 }).split('|')[0].trim() : t('players.playerCount', { count: playersCount }).split('|')[1].trim() }}
+          {{ t('players.playerCount', playersCount) }}
           {{ selectedPosition ? `(${positionFilterLabel})` : '' }}
         </p>
       </div>
