@@ -381,8 +381,8 @@ function handleSubmit() {
 }
 
 .chip-active:hover {
-  background-color: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
 .error-text {
@@ -425,7 +425,7 @@ function handleSubmit() {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-dark);
+  background: var(--primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow);
 }

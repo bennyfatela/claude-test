@@ -203,7 +203,7 @@ const handleCancel = () => {
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-dark);
+  background-color: var(--primary-hover);
 }
 
 .btn-secondary {

@@ -435,8 +435,8 @@ textarea.form-control {
 }
 
 .chip-active:hover {
-  background-color: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
 .days-buttons {
@@ -473,8 +473,8 @@ textarea.form-control {
 }
 
 .day-button-active:hover {
-  background-color: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
 .modal-footer {
@@ -501,7 +501,7 @@ textarea.form-control {
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-dark);
+  background-color: var(--primary-hover);
 }
 
 .btn-secondary {

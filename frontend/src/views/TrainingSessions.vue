@@ -243,7 +243,7 @@ const getRecurringCount = (recurringId: string): number => {
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-dark);
+  background-color: var(--primary-hover);
 }
 
 .empty-state {

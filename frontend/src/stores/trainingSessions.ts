@@ -51,7 +51,13 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
         const { data } = await apolloClient.query({
           query: GET_TRAINING_SESSIONS,
         });
-        this.sessions = data.trainingSessions;
+        // Create copies with mutable arrays to avoid frozen array issues
+        this.sessions = data.trainingSessions.map((session: any) => ({
+          ...session,
+          objectives: session.objectives ? [...session.objectives] : [],
+          components: session.components ? [...session.components] : [],
+          recurringDays: session.recurringDays ? [...session.recurringDays] : [],
+        }));
       } catch (error: any) {
         this.error = error.message;
         console.error('Error fetching training sessions:', error);
@@ -116,7 +122,14 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
                 input: { ...sessions[i], title },
               },
             });
-            this.sessions.push(data.createTrainingSession);
+            // Create a copy with mutable arrays to avoid frozen array issues
+            const session = {
+              ...data.createTrainingSession,
+              objectives: data.createTrainingSession.objectives ? [...data.createTrainingSession.objectives] : [],
+              components: data.createTrainingSession.components ? [...data.createTrainingSession.components] : [],
+              recurringDays: data.createTrainingSession.recurringDays ? [...data.createTrainingSession.recurringDays] : [],
+            };
+            this.sessions.push(session);
           }
           console.log('All recurring sessions created successfully');
           return sessions;
@@ -134,8 +147,15 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
               },
             },
           });
-          this.sessions.push(data.createTrainingSession);
-          return [data.createTrainingSession];
+          // Create a copy with mutable arrays to avoid frozen array issues
+          const session = {
+            ...data.createTrainingSession,
+            objectives: data.createTrainingSession.objectives ? [...data.createTrainingSession.objectives] : [],
+            components: data.createTrainingSession.components ? [...data.createTrainingSession.components] : [],
+            recurringDays: data.createTrainingSession.recurringDays ? [...data.createTrainingSession.recurringDays] : [],
+          };
+          this.sessions.push(session);
+          return [session];
         }
       } catch (error: any) {
         this.error = error.message;
@@ -213,11 +233,18 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
             input: sessionData,
           },
         });
+        // Create a copy with mutable arrays to avoid frozen array issues
+        const session = {
+          ...data.updateTrainingSession,
+          objectives: data.updateTrainingSession.objectives ? [...data.updateTrainingSession.objectives] : [],
+          components: data.updateTrainingSession.components ? [...data.updateTrainingSession.components] : [],
+          recurringDays: data.updateTrainingSession.recurringDays ? [...data.updateTrainingSession.recurringDays] : [],
+        };
         const index = this.sessions.findIndex((s) => s.id === id);
         if (index !== -1) {
-          this.sessions[index] = data.updateTrainingSession;
+          this.sessions[index] = session;
         }
-        return data.updateTrainingSession;
+        return session;
       } catch (error: any) {
         this.error = error.message;
         console.error('Error updating training session:', error);

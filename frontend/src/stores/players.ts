@@ -38,7 +38,11 @@ export const usePlayersStore = defineStore('players', {
         const { data } = await apolloClient.query({
           query: GET_PLAYERS,
         });
-        this.players = data.players;
+        // Create copies with mutable arrays to avoid frozen array issues
+        this.players = data.players.map((player: any) => ({
+          ...player,
+          positions: [...player.positions],
+        }));
       } catch (error: any) {
         this.error = error.message;
         console.error('Error fetching players:', error);
@@ -57,8 +61,13 @@ export const usePlayersStore = defineStore('players', {
             input: playerData,
           },
         });
-        this.players.push(data.createPlayer);
-        return data.createPlayer;
+        // Create a copy with mutable arrays to avoid frozen array issues
+        const player = {
+          ...data.createPlayer,
+          positions: [...data.createPlayer.positions],
+        };
+        this.players.push(player);
+        return player;
       } catch (error: any) {
         this.error = error.message;
         console.error('Error creating player:', error);
@@ -79,11 +88,16 @@ export const usePlayersStore = defineStore('players', {
             input: playerData,
           },
         });
+        // Create a copy with mutable arrays to avoid frozen array issues
+        const player = {
+          ...data.updatePlayer,
+          positions: [...data.updatePlayer.positions],
+        };
         const index = this.players.findIndex((p) => p.id === id);
         if (index !== -1) {
-          this.players[index] = data.updatePlayer;
+          this.players[index] = player;
         }
-        return data.updatePlayer;
+        return player;
       } catch (error: any) {
         this.error = error.message;
         console.error('Error updating player:', error);
