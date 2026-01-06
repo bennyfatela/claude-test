@@ -92,36 +92,54 @@
         </div>
       </div>
 
-      <div v-if="session.objectives && session.objectives.length > 0" class="session-section">
-        <strong class="section-label">{{ t('trainingSessions.form.objectives') }}:</strong>
-        <div class="objectives-list">
-          <span
-            v-for="objective in session.objectives"
-            :key="objective"
-            class="objective-badge"
-            :class="`objective-${objective.toLowerCase()}`"
-          >
-            {{ getObjectiveLabel(objective) }}
-          </span>
+      <!-- Objectives and Components in 2 columns -->
+      <div v-if="(session.objectives && session.objectives.length > 0) || (session.components && session.components.length > 0)" class="session-section two-column-section">
+        <div v-if="session.objectives && session.objectives.length > 0" class="column">
+          <strong class="section-label">{{ t('trainingSessions.form.objectives') }}:</strong>
+          <div class="objectives-list">
+            <span
+              v-for="objective in session.objectives"
+              :key="objective"
+              class="objective-badge"
+              :class="`objective-${objective.toLowerCase()}`"
+            >
+              {{ getObjectiveLabel(objective) }}
+            </span>
+          </div>
+        </div>
+
+        <div v-if="session.components && session.components.length > 0" class="column">
+          <strong class="section-label">{{ t('trainingSessions.form.components') }}:</strong>
+          <div class="components-list">
+            <span
+              v-for="component in session.components"
+              :key="component"
+              class="component-tag"
+            >
+              {{ getComponentLabel(component) }}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div v-if="session.components && session.components.length > 0" class="session-section">
-        <strong class="section-label">{{ t('trainingSessions.form.components') }}:</strong>
-        <div class="components-list">
-          <span
-            v-for="component in session.components"
-            :key="component"
-            class="component-tag"
+      <!-- Expandable Comments Drawer -->
+      <div v-if="session.comments" class="comments-drawer">
+        <button class="drawer-toggle" @click="toggleComments">
+          <span class="drawer-label">{{ t('trainingSessions.form.comments') }}</span>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            class="drawer-icon"
+            :class="{ 'expanded': showComments }"
           >
-            {{ getComponentLabel(component) }}
-          </span>
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+          </svg>
+        </button>
+        <div v-show="showComments" class="drawer-content">
+          <p class="session-comments">{{ session.comments }}</p>
         </div>
-      </div>
-
-      <div v-if="session.comments" class="session-section">
-        <strong class="section-label">{{ t('trainingSessions.form.comments') }}:</strong>
-        <p class="session-comments">{{ session.comments }}</p>
       </div>
     </div>
 
@@ -171,8 +189,13 @@ const emit = defineEmits<Emits>();
 const { t, locale } = useI18n();
 
 const showDeleteModal = ref(false);
+const showComments = ref(false);
 
 const isRecurring = computed(() => !!props.session.recurringId);
+
+const toggleComments = () => {
+  showComments.value = !showComments.value;
+};
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -335,6 +358,16 @@ const confirmDelete = () => {
   border-top: 1px solid var(--gray-100);
 }
 
+.two-column-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.column {
+  min-width: 0;
+}
+
 .section-label {
   display: block;
   font-size: 0.75rem;
@@ -398,6 +431,63 @@ const confirmDelete = () => {
   line-height: 1.5;
 }
 
+/* Comments Drawer */
+.comments-drawer {
+  padding-top: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  border-top: 1px solid var(--gray-100);
+}
+
+.drawer-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: var(--spacing-xs) 0;
+  cursor: pointer;
+  color: var(--gray-700);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.drawer-toggle:hover {
+  color: var(--primary-color);
+}
+
+.drawer-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gray-600);
+}
+
+.drawer-icon {
+  color: var(--gray-400);
+  transition: transform 0.2s ease;
+}
+
+.drawer-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.drawer-content {
+  padding-top: var(--spacing-sm);
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .btn-dialog {
   padding: 0.625rem 1.25rem;
   border: none;
@@ -430,5 +520,12 @@ const confirmDelete = () => {
 
 .btn-dialog.btn-danger:hover {
   background-color: var(--danger-hover);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .two-column-section {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
