@@ -406,6 +406,9 @@ function handleSubmit() {
   cursor: pointer;
   transition: all 0.2s;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-outline {

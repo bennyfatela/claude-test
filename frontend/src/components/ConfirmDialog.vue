@@ -186,6 +186,9 @@ const handleCancel = () => {
   transition: all 0.2s ease;
   white-space: nowrap;
   min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn:hover {
