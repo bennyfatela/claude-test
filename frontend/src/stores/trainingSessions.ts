@@ -66,37 +66,25 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
       }
     },
 
-    generateSessionTitle(date: string, recurringId?: string): string {
-      // Get all sessions sorted by date
+    generateSessionTitle(date: string, startTime: string): string {
+      // Get all sessions sorted by date and time
       const sortedSessions = [...this.sessions].sort((a, b) => {
         const dateCompare = a.date.localeCompare(b.date);
         if (dateCompare !== 0) return dateCompare;
         return a.startTime.localeCompare(b.startTime);
       });
 
-      // If this is part of a recurring series and a session in that series already exists, use that title
-      if (recurringId) {
-        const existingInSeries = sortedSessions.find((s) => s.recurringId === recurringId);
-        if (existingInSeries?.title) {
-          return existingInSeries.title;
-        }
-      }
-
-      // Count unique sessions/series that come before or at the same time as this date
-      const uniqueSessions = new Set<string>();
-      const targetDate = new Date(date);
+      // Count sessions that come before this one chronologically
+      let sessionNumber = 1;
+      const targetDateTime = new Date(`${date}T${startTime}`);
 
       for (const session of sortedSessions) {
-        const sessionDate = new Date(session.date);
-        // Include sessions up to and including the target date
-        if (sessionDate <= targetDate) {
-          const key = session.recurringId || session.id;
-          uniqueSessions.add(key);
+        const sessionDateTime = new Date(`${session.date}T${session.startTime}`);
+        if (sessionDateTime < targetDateTime) {
+          sessionNumber++;
         }
       }
 
-      // Add 1 for the new session we're about to create
-      const sessionNumber = uniqueSessions.size + 1;
       return `Session ${sessionNumber}`;
     },
 
@@ -108,26 +96,10 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
         return a.startTime.localeCompare(b.startTime);
       });
 
-      // Track which recurring series we've already numbered
-      const numberedSeries = new Map<string, string>();
-      let sessionCounter = 1;
-
-      // Renumber sessions in chronological order
-      for (const session of sortedSessions) {
-        const key = session.recurringId || session.id;
-
-        let newTitle: string;
-        if (session.recurringId && numberedSeries.has(session.recurringId)) {
-          // Use the same title as the first session in this recurring series
-          newTitle = numberedSeries.get(session.recurringId)!;
-        } else {
-          // Assign a new number
-          newTitle = `Session ${sessionCounter}`;
-          if (session.recurringId) {
-            numberedSeries.set(session.recurringId, newTitle);
-          }
-          sessionCounter++;
-        }
+      // Renumber each session individually in chronological order
+      for (let i = 0; i < sortedSessions.length; i++) {
+        const session = sortedSessions[i];
+        const newTitle = `Session ${i + 1}`;
 
         // Update title if it changed
         if (session.title !== newTitle) {
@@ -166,16 +138,16 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
           const recurringId = crypto.randomUUID();
           const sessions = this.generateRecurringSessions(sessionData, recurringId);
           console.log(`Generated ${sessions.length} sessions`);
-          const firstSessionDate = sessions.length > 0 ? sessions[0].date : sessionData.date;
-          const title = this.generateSessionTitle(firstSessionDate, recurringId);
 
-          // Create all sessions via GraphQL
+          // Create all sessions via GraphQL - each gets its own title based on when it occurs
           for (let i = 0; i < sessions.length; i++) {
-            console.log(`Creating session ${i + 1}/${sessions.length}:`, sessions[i]);
+            const sessionToCreate = sessions[i];
+            const title = this.generateSessionTitle(sessionToCreate.date, sessionToCreate.startTime);
+            console.log(`Creating session ${i + 1}/${sessions.length}:`, sessionToCreate, 'with title:', title);
             const { data } = await apolloClient.mutate({
               mutation: CREATE_TRAINING_SESSION,
               variables: {
-                input: { ...sessions[i], title },
+                input: { ...sessionToCreate, title },
               },
             });
             // Create a copy with mutable arrays to avoid frozen array issues
@@ -192,7 +164,7 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
         } else {
           console.log('Creating single session');
           // Single session
-          const title = this.generateSessionTitle(sessionData.date);
+          const title = this.generateSessionTitle(sessionData.date, sessionData.startTime);
           const { data } = await apolloClient.mutate({
             mutation: CREATE_TRAINING_SESSION,
             variables: {
