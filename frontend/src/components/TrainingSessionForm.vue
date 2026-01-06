@@ -253,11 +253,11 @@ watch(
         startTime: newSession.startTime,
         endTime: newSession.endTime || '',
         location: newSession.location || '',
-        objectives: newSession.objectives || [],
-        components: newSession.components || [],
+        objectives: newSession.objectives ? [...newSession.objectives] : [], // Create a copy to avoid frozen array issues
+        components: newSession.components ? [...newSession.components] : [], // Create a copy to avoid frozen array issues
         comments: newSession.comments || '',
         recurringPattern: newSession.recurringPattern || 'none',
-        recurringDays: newSession.recurringDays || [],
+        recurringDays: newSession.recurringDays ? [...newSession.recurringDays] : [], // Create a copy to avoid frozen array issues
         recurringEndDate: newSession.recurringEndDate || '',
       };
     }

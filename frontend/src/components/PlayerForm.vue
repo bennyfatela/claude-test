@@ -154,7 +154,7 @@ const formData = reactive<FormData>({
   firstName: props.player?.firstName || '',
   lastName: props.player?.lastName || '',
   jerseyNumber: props.player?.jerseyNumber || null,
-  positions: props.player?.positions || [],
+  positions: props.player?.positions ? [...props.player.positions] : [], // Create a copy to avoid frozen array issues
   dateOfBirth: props.player?.dateOfBirth || '',
   photo: props.player?.photo || '',
   comments: props.player?.comments || '',
