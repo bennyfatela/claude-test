@@ -218,17 +218,12 @@ const handleCancel = () => {
 }
 
 .btn-danger {
-  background-color: var(--red-600);
+  background-color: var(--danger-color);
   color: white;
 }
 
 .btn-danger:hover {
-  background-color: var(--red-700);
-}
-
-:root {
-  --red-600: #dc2626;
-  --red-700: #b91c1c;
+  background-color: var(--danger-hover);
 }
 
 @media (max-width: 640px) {
