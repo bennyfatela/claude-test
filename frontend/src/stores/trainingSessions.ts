@@ -108,7 +108,19 @@ export const useTrainingSessionsStore = defineStore('trainingSessions', {
               mutation: UPDATE_TRAINING_SESSION,
               variables: {
                 id: session.id,
-                input: { title: newTitle },
+                input: {
+                  title: newTitle,
+                  date: session.date,
+                  startTime: session.startTime,
+                  endTime: session.endTime,
+                  location: session.location,
+                  objectives: session.objectives,
+                  components: session.components,
+                  comments: session.comments,
+                  recurringPattern: session.recurringPattern,
+                  recurringDays: session.recurringDays,
+                  recurringEndDate: session.recurringEndDate,
+                },
               },
             });
             // Update local store
