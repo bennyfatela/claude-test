@@ -142,11 +142,10 @@ const handleSubmitSession = async (data: Partial<TrainingSession>) => {
     } else {
       // Create new session(s)
       await sessionsStore.addSession(data as Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>);
-      // Renumber all sessions to maintain chronological order
-      await sessionsStore.renumberAllSessions();
     }
-    // Explicitly refresh sessions to update UI
+    // Refresh sessions from backend first, then renumber
     await sessionsStore.fetchTrainingSessions();
+    await sessionsStore.renumberAllSessions();
   } catch (error) {
     console.error('Error submitting session:', error);
   } finally {
@@ -157,10 +156,9 @@ const handleSubmitSession = async (data: Partial<TrainingSession>) => {
 const handleDeleteSession = async (sessionId: string) => {
   try {
     await sessionsStore.deleteSession(sessionId);
-    // Renumber all sessions to maintain chronological order
-    await sessionsStore.renumberAllSessions();
-    // Explicitly refresh sessions to update UI
+    // Refresh sessions from backend first, then renumber
     await sessionsStore.fetchTrainingSessions();
+    await sessionsStore.renumberAllSessions();
   } catch (error) {
     console.error('Error deleting session:', error);
   }
@@ -169,10 +167,9 @@ const handleDeleteSession = async (sessionId: string) => {
 const handleDeleteAllSessions = async (recurringId: string) => {
   try {
     await sessionsStore.deleteAllRecurringSessions(recurringId);
-    // Renumber all sessions to maintain chronological order
-    await sessionsStore.renumberAllSessions();
-    // Explicitly refresh sessions to update UI
+    // Refresh sessions from backend first, then renumber
     await sessionsStore.fetchTrainingSessions();
+    await sessionsStore.renumberAllSessions();
   } catch (error) {
     console.error('Error deleting recurring sessions:', error);
   }
