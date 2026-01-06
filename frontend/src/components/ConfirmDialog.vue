@@ -163,7 +163,7 @@ const handleCancel = () => {
 .modal-footer {
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   padding: var(--spacing-lg);
   border-top: 1px solid var(--gray-200);
 }
@@ -172,8 +172,12 @@ const handleCancel = () => {
   flex-direction: column;
 }
 
+.modal-footer.vertical .btn {
+  width: 100%;
+}
+
 .btn {
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: 0.625rem 1.25rem;
   border: none;
   border-radius: var(--border-radius);
   font-weight: 500;
@@ -181,6 +185,10 @@ const handleCancel = () => {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn:hover {
@@ -198,7 +206,7 @@ const handleCancel = () => {
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-dark);
+  background-color: var(--primary-hover);
 }
 
 .btn-secondary {
@@ -213,17 +221,12 @@ const handleCancel = () => {
 }
 
 .btn-danger {
-  background-color: var(--red-600);
+  background-color: var(--danger-color);
   color: white;
 }
 
 .btn-danger:hover {
-  background-color: var(--red-700);
-}
-
-:root {
-  --red-600: #dc2626;
-  --red-700: #b91c1c;
+  background-color: var(--danger-hover);
 }
 
 @media (max-width: 640px) {

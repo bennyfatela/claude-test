@@ -4,7 +4,7 @@
       <div>
         <p class="text-muted text-sm mb-2">{{ t('players.subtitle') }}</p>
         <p class="text-sm text-muted" v-if="playersCount > 0">
-          {{ playersCount }} {{ playersCount === 1 ? t('players.playerCount', { count: 1 }).split('|')[0].trim() : t('players.playerCount', { count: playersCount }).split('|')[1].trim() }}
+          {{ t('players.playerCount', playersCount) }}
           {{ selectedPosition ? `(${positionFilterLabel})` : '' }}
         </p>
       </div>
@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePlayersStore } from '../stores/players';
 import PlayerCard from '../components/PlayerCard.vue';
@@ -88,6 +88,11 @@ const showDeleteDialog = ref(false);
 const playerToDelete = ref<Player | null>(null);
 
 const playersCount = computed(() => playersStore.playersCount);
+
+// Fetch players on mount
+onMounted(() => {
+  playersStore.fetchPlayers();
+});
 
 const filteredPlayers = computed(() => {
   return playersStore.getPlayersByPosition(selectedPosition.value);
@@ -108,11 +113,11 @@ const positionNameMap: Record<Position, string> = {
   RIGHT_WING: 'rightWing',
 };
 
-function handleSubmit(formData: any) {
+async function handleSubmit(formData: any) {
   if (editingPlayer.value) {
-    playersStore.updatePlayer(editingPlayer.value.id, formData);
+    await playersStore.updatePlayer(editingPlayer.value.id, formData);
   } else {
-    playersStore.addPlayer(formData);
+    await playersStore.addPlayer(formData);
   }
   closeForm();
 }
@@ -127,9 +132,9 @@ function handleDelete(player: Player) {
   showDeleteDialog.value = true;
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (playerToDelete.value) {
-    playersStore.deletePlayer(playerToDelete.value.id);
+    await playersStore.deletePlayer(playerToDelete.value.id);
     playerToDelete.value = null;
   }
   showDeleteDialog.value = false;

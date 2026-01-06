@@ -371,7 +371,7 @@ const handleSessionClick = (session: TrainingSession) => {
 
 .session-item:hover {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-left-color: var(--primary-dark);
+  border-left-color: var(--primary-hover);
 }
 
 .session-header {

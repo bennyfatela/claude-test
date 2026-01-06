@@ -97,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTrainingSessionsStore } from '../stores/trainingSessions';
 import TrainingSessionCard from '../components/TrainingSessionCard.vue';
@@ -107,6 +107,11 @@ import type { TrainingSession } from '../types';
 
 const { t } = useI18n();
 const sessionsStore = useTrainingSessionsStore();
+
+// Fetch sessions when component mounts
+onMounted(() => {
+  sessionsStore.fetchTrainingSessions();
+});
 
 const viewMode = ref<'list' | 'calendar'>('list');
 const showSessionForm = ref(false);
@@ -133,23 +138,46 @@ const handleDateClick = (date: string) => {
   showSessionForm.value = true;
 };
 
-const handleSubmitSession = (data: Partial<TrainingSession>) => {
-  if (editingSession.value) {
-    // Update existing session
-    sessionsStore.updateSession(editingSession.value.id, data);
-  } else {
-    // Create new session(s)
-    sessionsStore.addSession(data as Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>);
+const handleSubmitSession = async (data: Partial<TrainingSession>) => {
+  try {
+    console.log('Submitting session with data:', data);
+    if (editingSession.value) {
+      // Update existing session
+      await sessionsStore.updateSession(editingSession.value.id, data);
+    } else {
+      // Create new session(s)
+      await sessionsStore.addSession(data as Omit<TrainingSession, 'id' | 'createdAt' | 'updatedAt'>);
+    }
+    // Refresh sessions from backend first, then renumber
+    await sessionsStore.fetchTrainingSessions();
+    await sessionsStore.renumberAllSessions();
+  } catch (error) {
+    console.error('Error submitting session:', error);
+  } finally {
+    closeSessionForm();
   }
-  closeSessionForm();
 };
 
-const handleDeleteSession = (sessionId: string) => {
-  sessionsStore.deleteSession(sessionId);
+const handleDeleteSession = async (sessionId: string) => {
+  try {
+    await sessionsStore.deleteSession(sessionId);
+    // Refresh sessions from backend first, then renumber
+    await sessionsStore.fetchTrainingSessions();
+    await sessionsStore.renumberAllSessions();
+  } catch (error) {
+    console.error('Error deleting session:', error);
+  }
 };
 
-const handleDeleteAllSessions = (recurringId: string) => {
-  sessionsStore.deleteAllRecurringSessions(recurringId);
+const handleDeleteAllSessions = async (recurringId: string) => {
+  try {
+    await sessionsStore.deleteAllRecurringSessions(recurringId);
+    // Refresh sessions from backend first, then renumber
+    await sessionsStore.fetchTrainingSessions();
+    await sessionsStore.renumberAllSessions();
+  } catch (error) {
+    console.error('Error deleting recurring sessions:', error);
+  }
 };
 
 const getRecurringCount = (recurringId: string): number => {
@@ -208,6 +236,7 @@ const getRecurringCount = (recurringId: string): number => {
 .btn {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-xs);
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
@@ -223,7 +252,7 @@ const getRecurringCount = (recurringId: string): number => {
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-dark);
+  background-color: var(--primary-hover);
 }
 
 .empty-state {

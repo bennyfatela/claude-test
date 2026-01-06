@@ -1,10 +1,16 @@
-// Placeholder resolvers - to be implemented
+import { db } from '../db';
+
 export const resolvers = {
   Query: {
-    players: () => [],
-    player: () => null,
-    trainingSessions: () => [],
-    trainingSession: () => null,
+    // Players
+    players: () => db.getPlayers(),
+    player: (_: any, { id }: { id: string }) => db.getPlayer(id),
+
+    // Training Sessions
+    trainingSessions: () => db.getTrainingSessions(),
+    trainingSession: (_: any, { id }: { id: string }) => db.getTrainingSession(id),
+
+    // Not yet implemented
     games: () => [],
     game: () => null,
     drills: () => [],
@@ -14,13 +20,39 @@ export const resolvers = {
     gameEvents: () => [],
     statistics: () => [],
   },
+
   Mutation: {
-    createPlayer: () => null,
-    updatePlayer: () => null,
-    deletePlayer: () => false,
-    createTrainingSession: () => null,
-    updateTrainingSession: () => null,
-    deleteTrainingSession: () => false,
+    // Player mutations
+    createPlayer: (_: any, { input }: { input: any }) => {
+      return db.createPlayer(input);
+    },
+
+    updatePlayer: (_: any, { id, input }: { id: string; input: any }) => {
+      return db.updatePlayer(id, input);
+    },
+
+    deletePlayer: (_: any, { id }: { id: string }) => {
+      return db.deletePlayer(id);
+    },
+
+    // Training session mutations
+    createTrainingSession: (_: any, { input }: { input: any }) => {
+      return db.createTrainingSession(input);
+    },
+
+    updateTrainingSession: (_: any, { id, input }: { id: string; input: any }) => {
+      return db.updateTrainingSession(id, input);
+    },
+
+    deleteTrainingSession: (_: any, { id }: { id: string }) => {
+      return db.deleteTrainingSession(id);
+    },
+
+    deleteTrainingSessionsByRecurringId: (_: any, { recurringId }: { recurringId: string }) => {
+      return db.deleteTrainingSessionsByRecurringId(recurringId);
+    },
+
+    // Not yet implemented
     createGame: () => null,
     updateGame: () => null,
     deleteGame: () => false,

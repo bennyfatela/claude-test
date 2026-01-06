@@ -49,48 +49,51 @@
           />
         </div>
 
-        <div class="form-group">
-          <label>{{ t('trainingSessions.form.objectives') }}</label>
-          <div class="chip-grid">
-            <button
-              v-for="option in objectiveOptions"
-              :key="option.value"
-              type="button"
-              class="chip"
-              :class="{ 'chip-active': formData.objectives?.includes(option.value) }"
-              @click="toggleObjective(option.value)"
-            >
-              {{ option.label }}
-            </button>
+        <!-- Only show objectives, components, and comments in edit mode -->
+        <template v-if="editMode">
+          <div class="form-group">
+            <label>{{ t('trainingSessions.form.objectives') }}</label>
+            <div class="chip-grid">
+              <button
+                v-for="option in objectiveOptions"
+                :key="option.value"
+                type="button"
+                class="chip"
+                :class="{ 'chip-active': formData.objectives?.includes(option.value) }"
+                @click="toggleObjective(option.value)"
+              >
+                {{ option.label }}
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>{{ t('trainingSessions.form.components') }}</label>
-          <div class="chip-grid">
-            <button
-              v-for="option in componentOptions"
-              :key="option.value"
-              type="button"
-              class="chip"
-              :class="{ 'chip-active': formData.components?.includes(option.value) }"
-              @click="toggleComponent(option.value)"
-            >
-              {{ option.label }}
-            </button>
+          <div class="form-group">
+            <label>{{ t('trainingSessions.form.components') }}</label>
+            <div class="chip-grid">
+              <button
+                v-for="option in componentOptions"
+                :key="option.value"
+                type="button"
+                class="chip"
+                :class="{ 'chip-active': formData.components?.includes(option.value) }"
+                @click="toggleComponent(option.value)"
+              >
+                {{ option.label }}
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="comments">{{ t('trainingSessions.form.comments') }}</label>
-          <textarea
-            id="comments"
-            v-model="formData.comments"
-            class="form-control"
-            rows="2"
-            :placeholder="t('trainingSessions.form.commentsPlaceholder')"
-          ></textarea>
-        </div>
+          <div class="form-group">
+            <label for="comments">{{ t('trainingSessions.form.comments') }}</label>
+            <textarea
+              id="comments"
+              v-model="formData.comments"
+              class="form-control"
+              rows="2"
+              :placeholder="t('trainingSessions.form.commentsPlaceholder')"
+            ></textarea>
+          </div>
+        </template>
 
         <div v-if="!editMode" class="form-group">
           <label for="recurringPattern">{{ t('trainingSessions.form.recurringPattern') }}</label>
@@ -250,11 +253,11 @@ watch(
         startTime: newSession.startTime,
         endTime: newSession.endTime || '',
         location: newSession.location || '',
-        objectives: newSession.objectives || [],
-        components: newSession.components || [],
+        objectives: newSession.objectives ? [...newSession.objectives] : [], // Create a copy to avoid frozen array issues
+        components: newSession.components ? [...newSession.components] : [], // Create a copy to avoid frozen array issues
         comments: newSession.comments || '',
         recurringPattern: newSession.recurringPattern || 'none',
-        recurringDays: newSession.recurringDays || [],
+        recurringDays: newSession.recurringDays ? [...newSession.recurringDays] : [], // Create a copy to avoid frozen array issues
         recurringEndDate: newSession.recurringEndDate || '',
       };
     }
@@ -432,35 +435,35 @@ textarea.form-control {
 }
 
 .chip-active:hover {
-  background-color: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
 .days-buttons {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
   flex-wrap: wrap;
 }
 
 .day-button {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-lg);
   border: 2px solid var(--gray-300);
   background: white;
   color: var(--gray-700);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 44px;
+  text-align: center;
 }
 
 .day-button:hover {
   background-color: var(--gray-50);
   border-color: var(--gray-400);
+  transform: translateY(-1px);
 }
 
 .day-button-active {
@@ -470,8 +473,8 @@ textarea.form-control {
 }
 
 .day-button-active:hover {
-  background-color: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
 .modal-footer {
@@ -490,6 +493,9 @@ textarea.form-control {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-primary {
@@ -498,7 +504,7 @@ textarea.form-control {
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-dark);
+  background-color: var(--primary-hover);
 }
 
 .btn-secondary {

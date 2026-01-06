@@ -81,12 +81,32 @@
           <router-link to="/sessions" class="text-sm text-muted">{{ t('common.viewAll') }}</router-link>
         </div>
         <div class="card-body">
-          <div class="empty-state">
+          <div v-if="upcomingSessions.length === 0" class="empty-state">
             <svg width="48" height="48" viewBox="0 0 20 20" fill="currentColor" class="empty-icon">
               <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"/>
             </svg>
             <p class="empty-text">{{ t('dashboard.noSessionsScheduled') }}</p>
             <router-link to="/sessions" class="btn btn-outline">{{ t('dashboard.addSession') }}</router-link>
+          </div>
+          <div v-else class="upcoming-sessions">
+            <div
+              v-for="session in upcomingSessions"
+              :key="session.id"
+              class="upcoming-session-item"
+            >
+              <div class="session-date">
+                <div class="session-day">{{ formatDay(session.date) }}</div>
+                <div class="session-month">{{ formatMonth(session.date) }}</div>
+              </div>
+              <div class="session-details">
+                <div class="session-title">{{ session.title }}</div>
+                <div class="session-time">
+                  {{ formatTime(session.startTime) }}
+                  <span v-if="session.endTime">- {{ formatTime(session.endTime) }}</span>
+                </div>
+                <div v-if="session.location" class="session-location">{{ session.location }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -133,16 +153,44 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePlayersStore } from '../stores/players';
 import { useTrainingSessionsStore } from '../stores/trainingSessions';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const playersStore = usePlayersStore();
 const sessionsStore = useTrainingSessionsStore();
 const playersCount = computed(() => playersStore.playersCount);
 const sessionsCount = computed(() => sessionsStore.sessionsCount);
+
+// Get upcoming sessions (next 3 sessions from today)
+const upcomingSessions = computed(() => {
+  const today = new Date().toISOString().split('T')[0];
+  return sessionsStore.getAllSessions
+    .filter(session => session.date >= today)
+    .slice(0, 3);
+});
+
+const formatDay = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.getDate();
+};
+
+const formatMonth = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString(locale.value, { month: 'short' });
+};
+
+const formatTime = (timeString: string) => {
+  return timeString.substring(0, 5); // HH:MM
+};
+
+// Fetch data on mount
+onMounted(() => {
+  playersStore.fetchPlayers();
+  sessionsStore.fetchTrainingSessions();
+});
 </script>
 
 <style scoped>
@@ -290,6 +338,79 @@ const sessionsCount = computed(() => sessionsStore.sessionsCount);
 
 .action-button:hover svg {
   color: var(--primary-color);
+}
+
+/* Upcoming Sessions */
+.upcoming-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.upcoming-session-item {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.upcoming-session-item:hover {
+  background: var(--bg-primary);
+  border-color: var(--primary-color);
+  transform: translateX(4px);
+}
+
+.session-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  background: var(--primary-light);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+}
+
+.session-day {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.session-month {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+.session-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.session-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.session-time {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.session-location {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
 }
 
 /* Responsive */

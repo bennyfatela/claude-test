@@ -35,14 +35,28 @@ export const typeDefs = gql`
     GAME
   }
 
+  enum SessionObjective {
+    ATTACK
+    DEFENSE
+    TRANSITIONS
+  }
+
+  enum SessionComponent {
+    INDIVIDUAL_TACTIC
+    INDIVIDUAL_TECHNIC
+    GROUP_TACTIC
+    COLLECTIVE_TACTIC
+  }
+
   # Types
   type Player {
     id: ID!
     firstName: String!
     lastName: String!
     jerseyNumber: Int
-    position: Position!
+    positions: [Position!]!
     dateOfBirth: String
+    photo: String
     comments: String
     createdAt: String!
     updatedAt: String!
@@ -52,13 +66,18 @@ export const typeDefs = gql`
 
   type TrainingSession {
     id: ID!
+    title: String
     date: String!
     startTime: String!
     endTime: String
     location: String
+    objectives: [SessionObjective!]
+    components: [SessionComponent!]
     comments: String
-    drills: [Drill!]!
-    attendanceRecords: [AttendanceRecord!]!
+    recurringId: String
+    recurringPattern: String
+    recurringDays: [Int!]
+    recurringEndDate: String
     createdAt: String!
     updatedAt: String!
   }
@@ -132,17 +151,25 @@ export const typeDefs = gql`
     firstName: String!
     lastName: String!
     jerseyNumber: Int
-    position: Position!
+    positions: [Position!]!
     dateOfBirth: String
+    photo: String
     comments: String
   }
 
   input TrainingSessionInput {
+    title: String
     date: String!
     startTime: String!
     endTime: String
     location: String
+    objectives: [SessionObjective!]
+    components: [SessionComponent!]
     comments: String
+    recurringId: String
+    recurringPattern: String
+    recurringDays: [Int!]
+    recurringEndDate: String
   }
 
   input GameInput {
@@ -229,6 +256,7 @@ export const typeDefs = gql`
     createTrainingSession(input: TrainingSessionInput!): TrainingSession!
     updateTrainingSession(id: ID!, input: TrainingSessionInput!): TrainingSession!
     deleteTrainingSession(id: ID!): Boolean!
+    deleteTrainingSessionsByRecurringId(recurringId: ID!): Int!
 
     # Game mutations
     createGame(input: GameInput!): Game!

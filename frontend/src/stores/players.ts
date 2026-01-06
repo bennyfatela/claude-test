@@ -1,35 +1,20 @@
 import { defineStore } from 'pinia';
 import type { Player, Position } from '../types';
+import { apolloClient } from '../graphql/client';
+import { GET_PLAYERS } from '../graphql/queries';
+import { CREATE_PLAYER, UPDATE_PLAYER, DELETE_PLAYER } from '../graphql/mutations';
 
 interface PlayersState {
   players: Player[];
-}
-
-const STORAGE_KEY = 'handball-players';
-
-// Load initial state from localStorage
-function loadPlayersFromStorage(): Player[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error('Failed to load players from storage:', error);
-    return [];
-  }
-}
-
-// Save players to localStorage
-function savePlayersToStorage(players: Player[]): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(players));
-  } catch (error) {
-    console.error('Failed to save players to storage:', error);
-  }
+  loading: boolean;
+  error: string | null;
 }
 
 export const usePlayersStore = defineStore('players', {
   state: (): PlayersState => ({
-    players: loadPlayersFromStorage(),
+    players: [],
+    loading: false,
+    error: null,
   }),
 
   getters: {
@@ -39,47 +24,109 @@ export const usePlayersStore = defineStore('players', {
 
     getPlayersByPosition: (state) => (position: Position | null) => {
       if (!position) return state.players;
-      return state.players.filter((player) => player.position === position);
+      return state.players.filter((player) => player.positions.includes(position));
     },
 
     playersCount: (state) => state.players.length,
   },
 
   actions: {
-    addPlayer(playerData: Omit<Player, 'id' | 'createdAt' | 'updatedAt'>) {
-      const newPlayer: Player = {
-        id: crypto.randomUUID(),
-        ...playerData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      this.players.push(newPlayer);
-      savePlayersToStorage(this.players);
-      return newPlayer;
+    async fetchPlayers() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const { data } = await apolloClient.query({
+          query: GET_PLAYERS,
+        });
+        // Create copies with mutable arrays to avoid frozen array issues
+        this.players = data.players.map((player: any) => ({
+          ...player,
+          positions: [...player.positions],
+        }));
+      } catch (error: any) {
+        this.error = error.message;
+        console.error('Error fetching players:', error);
+      } finally {
+        this.loading = false;
+      }
     },
 
-    updatePlayer(id: string, playerData: Partial<Player>) {
-      const index = this.players.findIndex((p) => p.id === id);
-      if (index !== -1) {
-        this.players[index] = {
-          ...this.players[index],
-          ...playerData,
-          updatedAt: new Date().toISOString(),
+    async addPlayer(playerData: Omit<Player, 'id' | 'createdAt' | 'updatedAt'>) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const { data } = await apolloClient.mutate({
+          mutation: CREATE_PLAYER,
+          variables: {
+            input: playerData,
+          },
+        });
+        // Create a copy with mutable arrays to avoid frozen array issues
+        const player = {
+          ...data.createPlayer,
+          positions: [...data.createPlayer.positions],
         };
-        savePlayersToStorage(this.players);
-        return this.players[index];
+        this.players.push(player);
+        return player;
+      } catch (error: any) {
+        this.error = error.message;
+        console.error('Error creating player:', error);
+        throw error;
+      } finally {
+        this.loading = false;
       }
-      return null;
     },
 
-    deletePlayer(id: string) {
-      const index = this.players.findIndex((p) => p.id === id);
-      if (index !== -1) {
-        this.players.splice(index, 1);
-        savePlayersToStorage(this.players);
-        return true;
+    async updatePlayer(id: string, playerData: Partial<Player>) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const { data } = await apolloClient.mutate({
+          mutation: UPDATE_PLAYER,
+          variables: {
+            id,
+            input: playerData,
+          },
+        });
+        // Create a copy with mutable arrays to avoid frozen array issues
+        const player = {
+          ...data.updatePlayer,
+          positions: [...data.updatePlayer.positions],
+        };
+        const index = this.players.findIndex((p) => p.id === id);
+        if (index !== -1) {
+          this.players[index] = player;
+        }
+        return player;
+      } catch (error: any) {
+        this.error = error.message;
+        console.error('Error updating player:', error);
+        throw error;
+      } finally {
+        this.loading = false;
       }
-      return false;
+    },
+
+    async deletePlayer(id: string) {
+      this.loading = true;
+      this.error = null;
+      try {
+        await apolloClient.mutate({
+          mutation: DELETE_PLAYER,
+          variables: { id },
+        });
+        const index = this.players.findIndex((p) => p.id === id);
+        if (index !== -1) {
+          this.players.splice(index, 1);
+        }
+        return true;
+      } catch (error: any) {
+        this.error = error.message;
+        console.error('Error deleting player:', error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
     },
   },
 });
