@@ -56,10 +56,21 @@
             @click.stop="handleSessionClick(session)"
           >
             <div class="session-header">
-              <div class="session-title">{{ session.title }}</div>
-              <div class="session-time">
-                {{ formatTime(session.startTime) }}{{ session.endTime ? ` - ${formatTime(session.endTime)}` : '' }}
+              <div class="session-info">
+                <div class="session-title">{{ session.title }}</div>
+                <div class="session-time">
+                  {{ formatTime(session.startTime) }}{{ session.endTime ? ` - ${formatTime(session.endTime)}` : '' }}
+                </div>
               </div>
+              <button
+                class="attendance-icon-btn"
+                @click.stop="openAttendanceDialog(session)"
+                :title="t('attendance.markAttendance')"
+              >
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                </svg>
+              </button>
             </div>
             <div v-if="session.objectives && session.objectives.length > 0" class="session-objectives">
               <span
@@ -76,12 +87,23 @@
       </div>
     </div>
     </div>
+
+    <!-- Attendance Dialog -->
+    <AttendanceDialog
+      v-if="selectedSession"
+      :isOpen="showAttendanceDialog"
+      :sessionId="selectedSession.id"
+      sessionType="TRAINING"
+      @close="closeAttendanceDialog"
+      @saved="handleAttendanceSaved"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import AttendanceDialog from './AttendanceDialog.vue';
 import type { TrainingSession } from '../types';
 import { SessionObjective } from '../types';
 
@@ -99,6 +121,8 @@ const emit = defineEmits<Emits>();
 const { t, locale } = useI18n();
 
 const currentDate = ref(new Date());
+const showAttendanceDialog = ref(false);
+const selectedSession = ref<TrainingSession | null>(null);
 
 interface CalendarDate {
   date: Date;
@@ -225,6 +249,20 @@ const handleDateClick = (date: CalendarDate) => {
 
 const handleSessionClick = (session: TrainingSession) => {
   emit('sessionClick', session);
+};
+
+const openAttendanceDialog = (session: TrainingSession) => {
+  selectedSession.value = session;
+  showAttendanceDialog.value = true;
+};
+
+const closeAttendanceDialog = () => {
+  showAttendanceDialog.value = false;
+  selectedSession.value = null;
+};
+
+const handleAttendanceSaved = () => {
+  // Refresh or update as needed
 };
 </script>
 
@@ -376,8 +414,17 @@ const handleSessionClick = (session: TrainingSession) => {
 
 .session-header {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+}
+
+.session-info {
+  display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
 .session-title {
@@ -386,6 +433,31 @@ const handleSessionClick = (session: TrainingSession) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.attendance-icon-btn {
+  background: white;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-600);
+  transition: all 0.2s;
+  opacity: 0;
+  flex-shrink: 0;
+}
+
+.session-item:hover .attendance-icon-btn {
+  opacity: 1;
+}
+
+.attendance-icon-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
 .session-time {
