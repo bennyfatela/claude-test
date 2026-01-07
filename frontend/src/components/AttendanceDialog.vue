@@ -15,6 +15,42 @@
       </div>
 
       <div class="modal-body">
+        <!-- Legend -->
+        <div class="attendance-legend">
+          <div class="legend-item">
+            <div class="legend-icon present">
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="legend-text">{{ t('attendance.present') }}</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-icon late">
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="legend-text">{{ t('attendance.late') }}</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-icon excused">
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="legend-text">{{ t('attendance.excused') }}</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-icon absent">
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="legend-text">{{ t('attendance.absent') }}</span>
+          </div>
+        </div>
+
         <div class="attendance-summary">
           <div class="summary-stat">
             <span class="stat-label">{{ t('attendance.present') }}</span>
@@ -54,7 +90,12 @@
               </div>
               <div class="player-details">
                 <span class="player-name">{{ player.firstName }} {{ player.lastName }}</span>
-                <span v-if="player.jerseyNumber" class="player-number">#{{ player.jerseyNumber }}</span>
+                <div class="player-meta">
+                  <span v-if="player.jerseyNumber" class="player-number">#{{ player.jerseyNumber }}</span>
+                  <span v-if="playerAttendance[player.id]" class="player-status" :class="playerAttendance[player.id].toLowerCase()">
+                    {{ t(`attendance.${playerAttendance[player.id].toLowerCase()}`) }}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -325,6 +366,56 @@ const handleCancel = () => {
   flex: 1;
 }
 
+.attendance-legend {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.legend-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.legend-icon.present {
+  background: var(--secondary-color);
+}
+
+.legend-icon.late {
+  background: #f59e0b;
+}
+
+.legend-icon.excused {
+  background: #3b82f6;
+}
+
+.legend-icon.absent {
+  background: var(--danger-color);
+}
+
+.legend-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
 .attendance-summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -432,7 +523,7 @@ const handleCancel = () => {
 .player-details {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: 0.25rem;
 }
 
 .player-name {
@@ -440,9 +531,45 @@ const handleCancel = () => {
   color: var(--gray-800);
 }
 
+.player-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
 .player-number {
   font-size: 0.75rem;
   color: var(--gray-600);
+}
+
+.player-status {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.player-status.present {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.player-status.late {
+  background: #f59e0b;
+  color: white;
+}
+
+.player-status.excused {
+  background: #3b82f6;
+  color: white;
+}
+
+.player-status.absent {
+  background: var(--danger-color);
+  color: white;
 }
 
 .attendance-buttons {
@@ -559,6 +686,19 @@ const handleCancel = () => {
     max-width: 100%;
     max-height: 100vh;
     border-radius: 0;
+  }
+
+  .attendance-legend {
+    gap: var(--spacing-sm);
+  }
+
+  .legend-text {
+    font-size: 0.75rem;
+  }
+
+  .legend-icon {
+    width: 20px;
+    height: 20px;
   }
 
   .attendance-summary {
