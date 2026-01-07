@@ -26,6 +26,7 @@ export enum AttendanceStatus {
   ABSENT = 'ABSENT',
   LATE = 'LATE',
   EXCUSED = 'EXCUSED',
+  NOT_APPLICABLE = 'NOT_APPLICABLE',
 }
 
 export enum SessionType {

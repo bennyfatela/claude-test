@@ -35,8 +35,10 @@ export default {
     absent: 'Absent',
     late: 'Late',
     excused: 'Excused',
+    not_applicable: 'N/A',
     total: 'Total',
     noPlayers: 'No players to mark attendance for',
+    allMarked: 'All marked',
   },
   players: {
     title: 'Players',

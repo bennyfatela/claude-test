@@ -49,6 +49,14 @@
             </div>
             <span class="legend-text">{{ t('attendance.absent') }}</span>
           </div>
+          <div class="legend-item">
+            <div class="legend-icon not_applicable">
+              <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <span class="legend-text">{{ t('attendance.not_applicable') }}</span>
+          </div>
         </div>
 
         <div class="attendance-summary">
@@ -138,6 +146,16 @@
               >
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+              <button
+                class="status-btn not_applicable"
+                :class="{ 'active': playerAttendance[player.id] === 'NOT_APPLICABLE' }"
+                @click="markAttendance(player.id, 'NOT_APPLICABLE')"
+                :title="t('attendance.not_applicable')"
+              >
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/>
                 </svg>
               </button>
             </div>
@@ -410,6 +428,10 @@ const handleCancel = () => {
   background: var(--danger-color);
 }
 
+.legend-icon.not_applicable {
+  background: var(--gray-500);
+}
+
 .legend-text {
   font-size: 0.875rem;
   font-weight: 500;
@@ -572,6 +594,11 @@ const handleCancel = () => {
   color: white;
 }
 
+.player-status.not_applicable {
+  background: var(--gray-500);
+  color: white;
+}
+
 .attendance-buttons {
   display: flex;
   gap: var(--spacing-xs);
@@ -632,6 +659,16 @@ const handleCancel = () => {
 .status-btn.absent.active {
   background: var(--danger-color);
   border-color: var(--danger-color);
+  color: white;
+}
+
+.status-btn.not_applicable {
+  color: var(--gray-500);
+}
+
+.status-btn.not_applicable.active {
+  background: var(--gray-500);
+  border-color: var(--gray-500);
   color: white;
 }
 

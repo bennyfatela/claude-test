@@ -35,8 +35,10 @@ export default {
     absent: 'Ausente',
     late: 'Atrasado',
     excused: 'Falta justificada',
+    not_applicable: 'N/A',
     total: 'Total',
     noPlayers: 'Não há jogadores para marcar presenças',
+    allMarked: 'Tudo marcado',
   },
   players: {
     title: 'Jogadores',

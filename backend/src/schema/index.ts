@@ -28,6 +28,7 @@ export const typeDefs = gql`
     ABSENT
     LATE
     EXCUSED
+    NOT_APPLICABLE
   }
 
   enum SessionType {

@@ -21,11 +21,15 @@
           </svg>
         </h3>
         <div class="session-actions">
-          <button class="action-btn attendance-btn" @click="showAttendanceDialog = true" :title="t('attendance.markAttendance')">
+          <button
+            class="action-btn attendance-btn"
+            :class="{ 'attendance-complete': isAttendanceComplete }"
+            @click="showAttendanceDialog = true"
+            :title="isAttendanceComplete ? t('attendance.allMarked') : t('attendance.markAttendance')"
+          >
             <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
               <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
             </svg>
-            <span v-if="attendanceCount > 0" class="attendance-badge">{{ attendanceCount }}</span>
           </button>
           <button class="action-btn" @click="$emit('edit', session)" :title="t('common.edit')">
             <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
@@ -187,7 +191,7 @@ import { useI18n } from 'vue-i18n';
 import ConfirmDialog from './ConfirmDialog.vue';
 import AttendanceDialog from './AttendanceDialog.vue';
 import { apolloClient } from '../graphql/client';
-import { GET_ATTENDANCE_RECORDS } from '../graphql/queries';
+import { GET_ATTENDANCE_RECORDS, GET_PLAYERS } from '../graphql/queries';
 import type { TrainingSession } from '../types';
 import { SessionObjective, SessionComponent } from '../types';
 
@@ -209,32 +213,41 @@ const { t, locale } = useI18n();
 const showDeleteModal = ref(false);
 const showComments = ref(false);
 const showAttendanceDialog = ref(false);
-const attendanceCount = ref(0);
+const totalPlayers = ref(0);
+const markedPlayers = ref(0);
 
 const isRecurring = computed(() => !!props.session.recurringId);
+const isAttendanceComplete = computed(() => totalPlayers.value > 0 && markedPlayers.value === totalPlayers.value);
 
 const toggleComments = () => {
   showComments.value = !showComments.value;
 };
 
-const fetchAttendanceCount = async () => {
+const checkAttendanceStatus = async () => {
   try {
-    const { data } = await apolloClient.query({
+    // Get total players count
+    const playersResponse = await apolloClient.query({
+      query: GET_PLAYERS,
+    });
+    totalPlayers.value = (playersResponse.data.players || []).length;
+
+    // Get attendance records for this session
+    const attendanceResponse = await apolloClient.query({
       query: GET_ATTENDANCE_RECORDS,
       variables: { sessionId: props.session.id },
     });
-    attendanceCount.value = (data.attendanceRecords || []).filter((r: any) => r.status === 'PRESENT').length;
+    markedPlayers.value = (attendanceResponse.data.attendanceRecords || []).length;
   } catch (error) {
-    console.error('Error fetching attendance:', error);
+    console.error('Error checking attendance status:', error);
   }
 };
 
 const handleAttendanceSaved = () => {
-  fetchAttendanceCount();
+  checkAttendanceStatus();
 };
 
 onMounted(() => {
-  fetchAttendanceCount();
+  checkAttendanceStatus();
 });
 
 const formatDate = (dateString: string) => {
@@ -349,30 +362,21 @@ const confirmDelete = () => {
   border-color: var(--red-300);
 }
 
-.attendance-btn {
-  position: relative;
-}
-
 .attendance-btn:hover {
   background-color: var(--primary-light);
   color: var(--primary-color);
   border-color: var(--primary-color);
 }
 
-.attendance-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: var(--secondary-color);
+.attendance-btn.attendance-complete {
+  background-color: #3b82f6;
   color: white;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  font-size: 0.625rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-color: #3b82f6;
+}
+
+.attendance-btn.attendance-complete:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
 }
 
 .session-body {

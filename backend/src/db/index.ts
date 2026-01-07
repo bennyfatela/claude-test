@@ -58,7 +58,7 @@ export interface AttendanceRecord {
   playerId: string;
   sessionId: string;
   sessionType: 'TRAINING' | 'GAME';
-  status: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+  status: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'NOT_APPLICABLE';
   notes?: string;
   createdAt: string;
 }
