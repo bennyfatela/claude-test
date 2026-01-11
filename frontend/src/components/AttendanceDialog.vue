@@ -181,7 +181,7 @@ import { useI18n } from 'vue-i18n';
 import { apolloClient } from '../graphql/client';
 import { GET_PLAYERS } from '../graphql/queries';
 import { GET_ATTENDANCE_RECORDS } from '../graphql/queries';
-import { RECORD_ATTENDANCE } from '../graphql/mutations';
+import { RECORD_ATTENDANCE, DELETE_ATTENDANCE } from '../graphql/mutations';
 import type { Player, AttendanceStatus, SessionType } from '../types';
 
 interface Props {
@@ -201,6 +201,7 @@ const { t } = useI18n();
 
 const players = ref<Player[]>([]);
 const playerAttendance = ref<Record<string, AttendanceStatus>>({});
+const originalAttendance = ref<Record<string, AttendanceStatus>>({});
 const loading = ref(false);
 const saving = ref(false);
 
@@ -228,6 +229,7 @@ const fetchAttendance = async () => {
     const { data } = await apolloClient.query({
       query: GET_ATTENDANCE_RECORDS,
       variables: { sessionId: props.sessionId },
+      fetchPolicy: 'network-only',
     });
 
     const records = data.attendanceRecords || [];
@@ -237,7 +239,8 @@ const fetchAttendance = async () => {
       attendanceMap[record.playerId] = record.status;
     });
 
-    playerAttendance.value = attendanceMap;
+    playerAttendance.value = { ...attendanceMap };
+    originalAttendance.value = { ...attendanceMap };
   } catch (error) {
     console.error('Error fetching attendance:', error);
   }
@@ -274,20 +277,39 @@ const markAttendance = (playerId: string, status: AttendanceStatus) => {
 const handleSave = async () => {
   saving.value = true;
   try {
-    // Record attendance for all players
-    const mutations = Object.entries(playerAttendance.value).map(([playerId, status]) => {
-      return apolloClient.mutate({
-        mutation: RECORD_ATTENDANCE,
-        variables: {
-          input: {
-            playerId,
-            sessionId: props.sessionId,
-            sessionType: props.sessionType,
-            status,
+    const mutations = [];
+
+    // Record/update attendance for all marked players
+    for (const [playerId, status] of Object.entries(playerAttendance.value)) {
+      mutations.push(
+        apolloClient.mutate({
+          mutation: RECORD_ATTENDANCE,
+          variables: {
+            input: {
+              playerId,
+              sessionId: props.sessionId,
+              sessionType: props.sessionType,
+              status,
+            },
           },
-        },
-      });
-    });
+        })
+      );
+    }
+
+    // Delete attendance for players that were unmarked
+    for (const playerId of Object.keys(originalAttendance.value)) {
+      if (!(playerId in playerAttendance.value)) {
+        mutations.push(
+          apolloClient.mutate({
+            mutation: DELETE_ATTENDANCE,
+            variables: {
+              playerId,
+              sessionId: props.sessionId,
+            },
+          })
+        );
+      }
+    }
 
     await Promise.all(mutations);
     emit('saved');

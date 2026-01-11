@@ -66,6 +66,10 @@ export const resolvers = {
       return db.updateAttendance(id, status, notes);
     },
 
+    deleteAttendance: (_: any, { playerId, sessionId }: { playerId: string; sessionId: string }) => {
+      return db.deleteAttendance(playerId, sessionId);
+    },
+
     // Game mutations
     createGame: (_: any, { input }: { input: any }) => {
       return db.createGame(input);

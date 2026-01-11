@@ -328,6 +328,14 @@ class Database {
     return records[index];
   }
 
+  deleteAttendance(playerId: string, sessionId: string): boolean {
+    const records = this.getAttendanceRecords();
+    const filtered = records.filter(r => !(r.playerId === playerId && r.sessionId === sessionId));
+    if (filtered.length === records.length) return false;
+    fs.writeFileSync(ATTENDANCE_FILE, JSON.stringify(filtered, null, 2));
+    return true;
+  }
+
   // Games
   getGames(): Game[] {
     try {

@@ -127,6 +127,12 @@ export const UPDATE_ATTENDANCE = gql`
   }
 `;
 
+export const DELETE_ATTENDANCE = gql`
+  mutation DeleteAttendance($playerId: ID!, $sessionId: ID!) {
+    deleteAttendance(playerId: $playerId, sessionId: $sessionId)
+  }
+`;
+
 // Game Mutations
 export const CREATE_GAME = gql`
   mutation CreateGame($input: GameInput!) {
