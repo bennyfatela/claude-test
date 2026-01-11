@@ -4,12 +4,12 @@
       <div>
         <p class="text-muted text-sm mb-2">{{ t('drills.subtitle') }}</p>
       </div>
-      <button class="btn btn-primary" @click="openCreateDialog">
+      <router-link to="/drills/new" class="btn btn-primary">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
         </svg>
         {{ t('drills.createDrill') }}
-      </button>
+      </router-link>
     </div>
 
     <div v-if="loading" class="loading-state">
@@ -24,7 +24,7 @@
         </svg>
         <h3>{{ t('drills.noDrills') }}</h3>
         <p class="empty-text">{{ t('drills.noDrillsText') }}</p>
-        <button class="btn btn-primary mt-4" @click="openCreateDialog">{{ t('drills.createFirstDrill') }}</button>
+        <router-link to="/drills/new" class="btn btn-primary mt-4">{{ t('drills.createFirstDrill') }}</router-link>
       </div>
     </div>
 
@@ -37,7 +37,7 @@
             v-for="drill in templates"
             :key="drill.id"
             :drill="drill"
-            @edit="openEditDialog(drill)"
+            @edit="navigateToEdit(drill.id)"
             @delete="handleDeleteDrill(drill)"
           />
         </div>
@@ -51,20 +51,12 @@
             v-for="drill in myDrills"
             :key="drill.id"
             :drill="drill"
-            @edit="openEditDialog(drill)"
+            @edit="navigateToEdit(drill.id)"
             @delete="handleDeleteDrill(drill)"
           />
         </div>
       </div>
     </div>
-
-    <!-- Drill Dialog -->
-    <DrillDialog
-      :isOpen="showDrillDialog"
-      :drill="selectedDrill"
-      @close="closeDrillDialog"
-      @save="handleSaveDrill"
-    />
 
     <!-- Delete Confirmation -->
     <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="closeDeleteConfirm">
@@ -91,21 +83,20 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { apolloClient } from '../graphql/client';
 import { GET_DRILLS } from '../graphql/queries';
-import { CREATE_DRILL, UPDATE_DRILL, DELETE_DRILL } from '../graphql/mutations';
+import { DELETE_DRILL } from '../graphql/mutations';
 import DrillCard from '../components/DrillCard.vue';
-import DrillDialog from '../components/DrillDialog.vue';
 import type { Drill } from '../types';
 
+const router = useRouter();
 const { t } = useI18n();
 
 const drills = ref<Drill[]>([]);
 const loading = ref(false);
-const showDrillDialog = ref(false);
 const showDeleteConfirm = ref(false);
-const selectedDrill = ref<Drill | null>(null);
 const drillToDelete = ref<Drill | null>(null);
 
 const templates = computed(() => drills.value.filter(d => d.isTemplate));
@@ -126,44 +117,8 @@ const fetchDrills = async () => {
   }
 };
 
-const openCreateDialog = () => {
-  selectedDrill.value = null;
-  showDrillDialog.value = true;
-};
-
-const openEditDialog = (drill: Drill) => {
-  selectedDrill.value = drill;
-  showDrillDialog.value = true;
-};
-
-const closeDrillDialog = () => {
-  showDrillDialog.value = false;
-  selectedDrill.value = null;
-};
-
-const handleSaveDrill = async (data: any) => {
-  try {
-    if (selectedDrill.value) {
-      await apolloClient.mutate({
-        mutation: UPDATE_DRILL,
-        variables: {
-          id: selectedDrill.value.id,
-          input: data,
-        },
-      });
-    } else {
-      await apolloClient.mutate({
-        mutation: CREATE_DRILL,
-        variables: {
-          input: data,
-        },
-      });
-    }
-    await fetchDrills();
-    closeDrillDialog();
-  } catch (error) {
-    console.error('Error saving drill:', error);
-  }
+const navigateToEdit = (id: string) => {
+  router.push(`/drills/${id}/edit`);
 };
 
 const handleDeleteDrill = (drill: Drill) => {
@@ -339,6 +294,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  text-decoration: none;
 }
 
 .btn:disabled {

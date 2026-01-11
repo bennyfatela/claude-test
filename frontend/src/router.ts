@@ -34,6 +34,16 @@ const router = createRouter({
       component: () => import('./views/Drills.vue'),
     },
     {
+      path: '/drills/new',
+      name: 'DrillCreate',
+      component: () => import('./views/DrillEdit.vue'),
+    },
+    {
+      path: '/drills/:id/edit',
+      name: 'DrillEdit',
+      component: () => import('./views/DrillEdit.vue'),
+    },
+    {
       path: '/statistics',
       name: 'Statistics',
       component: () => import('./views/Statistics.vue'),
