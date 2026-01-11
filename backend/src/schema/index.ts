@@ -272,6 +272,7 @@ export const typeDefs = gql`
     # Attendance mutations
     recordAttendance(input: AttendanceInput!): AttendanceRecord!
     updateAttendance(id: ID!, status: AttendanceStatus!, notes: String): AttendanceRecord!
+    deleteAttendance(playerId: ID!, sessionId: ID!): Boolean!
 
     # Event mutations
     createGameEvent(input: GameEventInput!): GameEvent!
