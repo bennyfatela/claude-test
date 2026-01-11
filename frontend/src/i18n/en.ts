@@ -8,6 +8,7 @@ export default {
     players: 'Players',
     trainingSessions: 'Training Sessions',
     games: 'Games',
+    drills: 'Drills',
     statistics: 'Statistics',
   },
   team: {
