@@ -64,8 +64,9 @@
               </div>
               <button
                 class="attendance-icon-btn"
+                :class="{ 'attendance-complete': attendanceComplete[session.id] }"
                 @click.stop="openAttendanceDialog(session)"
-                :title="t('attendance.markAttendance')"
+                :title="attendanceComplete[session.id] ? t('attendance.allMarked') : t('attendance.markAttendance')"
               >
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
@@ -101,11 +102,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AttendanceDialog from './AttendanceDialog.vue';
 import type { TrainingSession } from '../types';
 import { SessionObjective } from '../types';
+import { apolloClient } from '../graphql/client';
+import { GET_PLAYERS, GET_ATTENDANCE_RECORDS } from '../graphql/queries';
 
 interface Props {
   sessions: TrainingSession[];
@@ -123,6 +126,8 @@ const { t, locale } = useI18n();
 const currentDate = ref(new Date());
 const showAttendanceDialog = ref(false);
 const selectedSession = ref<TrainingSession | null>(null);
+const attendanceComplete = ref<Record<string, boolean>>({});
+const totalPlayers = ref(0);
 
 interface CalendarDate {
   date: Date;
@@ -224,6 +229,42 @@ const getObjectiveLabel = (objective: SessionObjective) => {
   return t(`trainingSessions.objectives.${objective}`);
 };
 
+const checkAttendanceStatus = async (sessionId: string) => {
+  try {
+    const attendanceResponse = await apolloClient.query({
+      query: GET_ATTENDANCE_RECORDS,
+      variables: { sessionId },
+      fetchPolicy: 'network-only',
+    });
+    const markedPlayers = (attendanceResponse.data.attendanceRecords || []).length;
+    attendanceComplete.value[sessionId] = totalPlayers.value > 0 && markedPlayers === totalPlayers.value;
+  } catch (error) {
+    console.error('Error checking attendance status:', error);
+  }
+};
+
+const loadTotalPlayers = async () => {
+  try {
+    const playersResponse = await apolloClient.query({
+      query: GET_PLAYERS,
+    });
+    totalPlayers.value = (playersResponse.data.players || []).length;
+  } catch (error) {
+    console.error('Error loading total players:', error);
+  }
+};
+
+const checkAllAttendanceStatuses = async () => {
+  await loadTotalPlayers();
+  const sessionIds = props.sessions.map(s => s.id);
+  await Promise.all(sessionIds.map(id => checkAttendanceStatus(id)));
+};
+
+// Watch for session changes and reload attendance status
+watch(() => props.sessions, () => {
+  checkAllAttendanceStatuses();
+}, { immediate: true });
+
 const previousMonth = () => {
   currentDate.value = new Date(
     currentDate.value.getFullYear(),
@@ -261,8 +302,11 @@ const closeAttendanceDialog = () => {
   selectedSession.value = null;
 };
 
-const handleAttendanceSaved = () => {
-  // Refresh or update as needed
+const handleAttendanceSaved = async () => {
+  // Refresh attendance status for the session
+  if (selectedSession.value) {
+    await checkAttendanceStatus(selectedSession.value.id);
+  }
 };
 </script>
 
@@ -460,6 +504,18 @@ const handleAttendanceSaved = () => {
   color: var(--primary-color);
   border-color: var(--primary-color);
   opacity: 1;
+}
+
+.attendance-icon-btn.attendance-complete {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+  opacity: 1;
+}
+
+.attendance-icon-btn.attendance-complete:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
 }
 
 .session-time {

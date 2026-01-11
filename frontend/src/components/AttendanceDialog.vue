@@ -176,7 +176,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { apolloClient } from '../graphql/client';
 import { GET_PLAYERS } from '../graphql/queries';
@@ -251,6 +251,13 @@ const loadData = async () => {
 
 watch(() => props.isOpen, (isOpen) => {
   if (isOpen) {
+    loadData();
+  }
+});
+
+// Load data on mount if dialog is already open (e.g., when created from calendar)
+onMounted(() => {
+  if (props.isOpen) {
     loadData();
   }
 });
