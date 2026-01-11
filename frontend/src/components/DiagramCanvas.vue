@@ -97,7 +97,7 @@ const tools = [
     icon: defineComponent({
       setup() {
         return () => h('svg', { width: 20, height: 20, viewBox: '0 0 20 20', fill: 'currentColor' }, [
-          h('circle', { cx: 10, cy: 10, r: 5, fill: '#f59e0b' })
+          h('path', { d: 'M10 2 L16 14 L4 14 Z', fill: '#f59e0b', stroke: '#000', 'stroke-width': 1 })
         ]);
       }
     })
@@ -132,11 +132,30 @@ const handleMouseDown = (e: MouseEvent) => {
     isDrawing.value = true;
     startPoint.value = pos;
   } else {
+    // Check if clicking on existing ball to rotate it
+    if (selectedTool.value === 'ball') {
+      const clickedBall = elements.value.find(el =>
+        el.type === 'ball' &&
+        Math.abs(el.x - pos.x) < 15 &&
+        Math.abs(el.y - pos.y) < 15
+      );
+
+      if (clickedBall) {
+        // Rotate the ball by 45 degrees
+        history.value.push([...elements.value]);
+        clickedBall.rotation = (clickedBall.rotation || 0) + 45;
+        redraw();
+        saveToModel();
+        return;
+      }
+    }
+
     // Add player or ball
     addElement({
       type: selectedTool.value,
       x: pos.x,
-      y: pos.y
+      y: pos.y,
+      rotation: 0
     });
   }
 };
@@ -217,10 +236,25 @@ const redraw = () => {
       ctx.lineWidth = 2;
       ctx.stroke();
     } else if (element.type === 'ball') {
+      // Draw triangle (ball)
+      const rotation = (element.rotation || 0) * Math.PI / 180;
+      ctx.save();
+      ctx.translate(element.x, element.y);
+      ctx.rotate(rotation);
+
       ctx.beginPath();
-      ctx.arc(element.x, element.y, 10, 0, Math.PI * 2);
+      ctx.moveTo(0, -12);      // Top point
+      ctx.lineTo(10, 8);       // Bottom right
+      ctx.lineTo(-10, 8);      // Bottom left
+      ctx.closePath();
+
       ctx.fillStyle = '#f59e0b';
       ctx.fill();
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.restore();
     } else if (element.type === 'arrow') {
       drawArrow(ctx, element.x1, element.y1, element.x2, element.y2, '#000');
     }
@@ -391,6 +425,9 @@ canvas {
 
 .legend-color.ball {
   background: #f59e0b;
-  border: none;
+  border: 2px solid #000;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  width: 24px;
+  height: 24px;
 }
 </style>
