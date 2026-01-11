@@ -126,3 +126,46 @@ export const UPDATE_ATTENDANCE = gql`
     }
   }
 `;
+
+// Game Mutations
+export const CREATE_GAME = gql`
+  mutation CreateGame($input: GameInput!) {
+    createGame(input: $input) {
+      id
+      date
+      startTime
+      opponent
+      location
+      homeGame
+      finalScore
+      videoUrl
+      comments
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_GAME = gql`
+  mutation UpdateGame($id: ID!, $input: GameInput!) {
+    updateGame(id: $id, input: $input) {
+      id
+      date
+      startTime
+      opponent
+      location
+      homeGame
+      finalScore
+      videoUrl
+      comments
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_GAME = gql`
+  mutation DeleteGame($id: ID!) {
+    deleteGame(id: $id)
+  }
+`;

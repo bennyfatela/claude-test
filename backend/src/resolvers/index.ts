@@ -14,9 +14,11 @@ export const resolvers = {
     attendanceRecords: (_: any, { sessionId, playerId }: { sessionId?: string; playerId?: string }) =>
       db.getAttendanceRecords(sessionId, playerId),
 
+    // Games
+    games: () => db.getGames(),
+    game: (_: any, { id }: { id: string }) => db.getGame(id),
+
     // Not yet implemented
-    games: () => [],
-    game: () => null,
     drills: () => [],
     drillTemplates: () => [],
     drill: () => null,
@@ -64,10 +66,20 @@ export const resolvers = {
       return db.updateAttendance(id, status, notes);
     },
 
+    // Game mutations
+    createGame: (_: any, { input }: { input: any }) => {
+      return db.createGame(input);
+    },
+
+    updateGame: (_: any, { id, input }: { id: string; input: any }) => {
+      return db.updateGame(id, input);
+    },
+
+    deleteGame: (_: any, { id }: { id: string }) => {
+      return db.deleteGame(id);
+    },
+
     // Not yet implemented
-    createGame: () => null,
-    updateGame: () => null,
-    deleteGame: () => false,
     createDrill: () => null,
     updateDrill: () => null,
     deleteDrill: () => false,

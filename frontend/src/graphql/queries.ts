@@ -94,3 +94,40 @@ export const GET_ATTENDANCE_RECORDS = gql`
     }
   }
 `;
+
+// Game Queries
+export const GET_GAMES = gql`
+  query GetGames {
+    games {
+      id
+      date
+      startTime
+      opponent
+      location
+      homeGame
+      finalScore
+      videoUrl
+      comments
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_GAME = gql`
+  query GetGame($id: ID!) {
+    game(id: $id) {
+      id
+      date
+      startTime
+      opponent
+      location
+      homeGame
+      finalScore
+      videoUrl
+      comments
+      createdAt
+      updatedAt
+    }
+  }
+`;

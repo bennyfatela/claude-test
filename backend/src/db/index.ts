@@ -5,6 +5,7 @@ const DB_DIR = path.join(__dirname, '../../data');
 const PLAYERS_FILE = path.join(DB_DIR, 'players.json');
 const SESSIONS_FILE = path.join(DB_DIR, 'training-sessions.json');
 const ATTENDANCE_FILE = path.join(DB_DIR, 'attendance.json');
+const GAMES_FILE = path.join(DB_DIR, 'games.json');
 
 // Ensure data directory exists
 if (!fs.existsSync(DB_DIR)) {
@@ -20,6 +21,9 @@ if (!fs.existsSync(SESSIONS_FILE)) {
 }
 if (!fs.existsSync(ATTENDANCE_FILE)) {
   fs.writeFileSync(ATTENDANCE_FILE, JSON.stringify([], null, 2));
+}
+if (!fs.existsSync(GAMES_FILE)) {
+  fs.writeFileSync(GAMES_FILE, JSON.stringify([], null, 2));
 }
 
 export interface Player {
@@ -61,6 +65,20 @@ export interface AttendanceRecord {
   status: 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED' | 'NOT_APPLICABLE';
   notes?: string;
   createdAt: string;
+}
+
+export interface Game {
+  id: string;
+  date: string;
+  startTime: string;
+  opponent: string;
+  location?: string;
+  homeGame: boolean;
+  finalScore?: string;
+  videoUrl?: string;
+  comments?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 class Database {
@@ -308,6 +326,69 @@ class Database {
     };
     fs.writeFileSync(ATTENDANCE_FILE, JSON.stringify(records, null, 2));
     return records[index];
+  }
+
+  // Games
+  getGames(): Game[] {
+    try {
+      const data = fs.readFileSync(GAMES_FILE, 'utf-8');
+      if (!data || data.trim() === '') {
+        fs.writeFileSync(GAMES_FILE, JSON.stringify([], null, 2));
+        return [];
+      }
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Error reading games file:', error);
+      if (fs.existsSync(GAMES_FILE)) {
+        const backupFile = GAMES_FILE + '.backup.' + Date.now();
+        fs.copyFileSync(GAMES_FILE, backupFile);
+        console.log(`Corrupted file backed up to ${backupFile}`);
+      }
+      fs.writeFileSync(GAMES_FILE, JSON.stringify([], null, 2));
+      return [];
+    }
+  }
+
+  getGame(id: string): Game | null {
+    const games = this.getGames();
+    return games.find(g => g.id === id) || null;
+  }
+
+  createGame(game: Omit<Game, 'id' | 'createdAt' | 'updatedAt'>): Game {
+    const games = this.getGames();
+    const now = new Date().toISOString();
+    const newGame: Game = {
+      id: this.generateId(),
+      ...game,
+      createdAt: now,
+      updatedAt: now,
+    };
+    games.push(newGame);
+    fs.writeFileSync(GAMES_FILE, JSON.stringify(games, null, 2));
+    return newGame;
+  }
+
+  updateGame(id: string, data: Partial<Game>): Game | null {
+    const games = this.getGames();
+    const index = games.findIndex(g => g.id === id);
+    if (index === -1) return null;
+
+    games[index] = {
+      ...games[index],
+      ...data,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    fs.writeFileSync(GAMES_FILE, JSON.stringify(games, null, 2));
+    return games[index];
+  }
+
+  deleteGame(id: string): boolean {
+    const games = this.getGames();
+    const filtered = games.filter(g => g.id !== id);
+    if (filtered.length === games.length) return false;
+    fs.writeFileSync(GAMES_FILE, JSON.stringify(filtered, null, 2));
+    return true;
   }
 
   private generateId(): string {
