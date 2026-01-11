@@ -110,7 +110,29 @@ class Database {
     };
     players.push(newPlayer);
     fs.writeFileSync(PLAYERS_FILE, JSON.stringify(players, null, 2));
+
+    // Mark as N/A in all past training sessions
+    this.markPlayerAsNAInPastSessions(newPlayer.id);
+
     return newPlayer;
+  }
+
+  private markPlayerAsNAInPastSessions(playerId: string): void {
+    const sessions = this.getTrainingSessions();
+    const today = new Date().toISOString().split('T')[0];
+
+    // Find all past sessions
+    const pastSessions = sessions.filter(session => session.date < today);
+
+    // Mark attendance as N/A for each past session
+    pastSessions.forEach(session => {
+      this.recordAttendance({
+        playerId,
+        sessionId: session.id,
+        sessionType: 'TRAINING',
+        status: 'NOT_APPLICABLE',
+      });
+    });
   }
 
   updatePlayer(id: string, data: Partial<Player>): Player | null {

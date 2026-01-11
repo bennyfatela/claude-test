@@ -444,20 +444,22 @@ const handleAttendanceSaved = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gray-600);
+  color: var(--gray-400);
   transition: all 0.2s;
-  opacity: 0;
+  opacity: 0.7;
   flex-shrink: 0;
 }
 
 .session-item:hover .attendance-icon-btn {
   opacity: 1;
+  color: var(--gray-600);
 }
 
 .attendance-icon-btn:hover {
   background: var(--primary-light);
   color: var(--primary-color);
   border-color: var(--primary-color);
+  opacity: 1;
 }
 
 .session-time {
