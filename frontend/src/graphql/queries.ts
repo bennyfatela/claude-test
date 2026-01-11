@@ -131,3 +131,64 @@ export const GET_GAME = gql`
     }
   }
 `;
+
+// Drill Queries
+export const GET_DRILLS = gql`
+  query GetDrills {
+    drills {
+      id
+      name
+      description
+      objectives
+      feedback
+      duration
+      category
+      isTemplate
+      imageUrl
+      videoUrl
+      diagramData
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_DRILL_TEMPLATES = gql`
+  query GetDrillTemplates {
+    drillTemplates {
+      id
+      name
+      description
+      objectives
+      feedback
+      duration
+      category
+      isTemplate
+      imageUrl
+      videoUrl
+      diagramData
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_DRILL = gql`
+  query GetDrill($id: ID!) {
+    drill(id: $id) {
+      id
+      name
+      description
+      objectives
+      feedback
+      duration
+      category
+      isTemplate
+      imageUrl
+      videoUrl
+      diagramData
+      createdAt
+      updatedAt
+    }
+  }
+`;

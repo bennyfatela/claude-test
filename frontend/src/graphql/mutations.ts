@@ -175,3 +175,50 @@ export const DELETE_GAME = gql`
     deleteGame(id: $id)
   }
 `;
+
+// Drill Mutations
+export const CREATE_DRILL = gql`
+  mutation CreateDrill($input: DrillInput!) {
+    createDrill(input: $input) {
+      id
+      name
+      description
+      objectives
+      feedback
+      duration
+      category
+      isTemplate
+      imageUrl
+      videoUrl
+      diagramData
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_DRILL = gql`
+  mutation UpdateDrill($id: ID!, $input: DrillInput!) {
+    updateDrill(id: $id, input: $input) {
+      id
+      name
+      description
+      objectives
+      feedback
+      duration
+      category
+      isTemplate
+      imageUrl
+      videoUrl
+      diagramData
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const DELETE_DRILL = gql`
+  mutation DeleteDrill($id: ID!) {
+    deleteDrill(id: $id)
+  }
+`;

@@ -6,6 +6,7 @@ const PLAYERS_FILE = path.join(DB_DIR, 'players.json');
 const SESSIONS_FILE = path.join(DB_DIR, 'training-sessions.json');
 const ATTENDANCE_FILE = path.join(DB_DIR, 'attendance.json');
 const GAMES_FILE = path.join(DB_DIR, 'games.json');
+const DRILLS_FILE = path.join(DB_DIR, 'drills.json');
 
 // Ensure data directory exists
 if (!fs.existsSync(DB_DIR)) {
@@ -24,6 +25,9 @@ if (!fs.existsSync(ATTENDANCE_FILE)) {
 }
 if (!fs.existsSync(GAMES_FILE)) {
   fs.writeFileSync(GAMES_FILE, JSON.stringify([], null, 2));
+}
+if (!fs.existsSync(DRILLS_FILE)) {
+  fs.writeFileSync(DRILLS_FILE, JSON.stringify([], null, 2));
 }
 
 export interface Player {
@@ -77,6 +81,22 @@ export interface Game {
   finalScore?: string;
   videoUrl?: string;
   comments?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Drill {
+  id: string;
+  name: string;
+  description?: string;
+  objectives?: string[];
+  feedback?: string;
+  duration?: number;
+  category?: string;
+  isTemplate: boolean;
+  imageUrl?: string;
+  videoUrl?: string;
+  diagramData?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -396,6 +416,73 @@ class Database {
     const filtered = games.filter(g => g.id !== id);
     if (filtered.length === games.length) return false;
     fs.writeFileSync(GAMES_FILE, JSON.stringify(filtered, null, 2));
+    return true;
+  }
+
+  // Drills
+  getDrills(): Drill[] {
+    try {
+      const data = fs.readFileSync(DRILLS_FILE, 'utf-8');
+      if (!data || data.trim() === '') {
+        fs.writeFileSync(DRILLS_FILE, JSON.stringify([], null, 2));
+        return [];
+      }
+      return JSON.parse(data);
+    } catch (error) {
+      console.error('Error reading drills file:', error);
+      if (fs.existsSync(DRILLS_FILE)) {
+        const backupFile = DRILLS_FILE + '.backup.' + Date.now();
+        fs.copyFileSync(DRILLS_FILE, backupFile);
+        console.log(`Corrupted file backed up to ${backupFile}`);
+      }
+      fs.writeFileSync(DRILLS_FILE, JSON.stringify([], null, 2));
+      return [];
+    }
+  }
+
+  getDrillTemplates(): Drill[] {
+    return this.getDrills().filter(d => d.isTemplate);
+  }
+
+  getDrill(id: string): Drill | null {
+    const drills = this.getDrills();
+    return drills.find(d => d.id === id) || null;
+  }
+
+  createDrill(drill: Omit<Drill, 'id' | 'createdAt' | 'updatedAt'>): Drill {
+    const drills = this.getDrills();
+    const now = new Date().toISOString();
+    const newDrill: Drill = {
+      id: this.generateId(),
+      ...drill,
+      createdAt: now,
+      updatedAt: now,
+    };
+    drills.push(newDrill);
+    fs.writeFileSync(DRILLS_FILE, JSON.stringify(drills, null, 2));
+    return newDrill;
+  }
+
+  updateDrill(id: string, data: Partial<Drill>): Drill | null {
+    const drills = this.getDrills();
+    const index = drills.findIndex(d => d.id === id);
+    if (index === -1) return null;
+
+    drills[index] = {
+      ...drills[index],
+      ...data,
+      id,
+      updatedAt: new Date().toISOString(),
+    };
+    fs.writeFileSync(DRILLS_FILE, JSON.stringify(drills, null, 2));
+    return drills[index];
+  }
+
+  deleteDrill(id: string): boolean {
+    const drills = this.getDrills();
+    const filtered = drills.filter(d => d.id !== id);
+    if (filtered.length === drills.length) return false;
+    fs.writeFileSync(DRILLS_FILE, JSON.stringify(filtered, null, 2));
     return true;
   }
 

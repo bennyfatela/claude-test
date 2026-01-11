@@ -103,9 +103,14 @@ export const typeDefs = gql`
     id: ID!
     name: String!
     description: String
+    objectives: [String!]
+    feedback: String
     duration: Int
     category: String
     isTemplate: Boolean!
+    imageUrl: String
+    videoUrl: String
+    diagramData: String
     createdAt: String!
     updatedAt: String!
   }
@@ -186,9 +191,14 @@ export const typeDefs = gql`
   input DrillInput {
     name: String!
     description: String
+    objectives: [String!]
+    feedback: String
     duration: Int
     category: String
     isTemplate: Boolean!
+    imageUrl: String
+    videoUrl: String
+    diagramData: String
   }
 
   input AttendanceInput {

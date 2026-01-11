@@ -96,9 +96,14 @@ export interface Drill {
   id: string;
   name: string;
   description?: string;
+  objectives?: string[];
+  feedback?: string;
   duration?: number;
   category?: string;
   isTemplate: boolean;
+  imageUrl?: string;
+  videoUrl?: string;
+  diagramData?: string;
   createdAt: string;
   updatedAt: string;
 }

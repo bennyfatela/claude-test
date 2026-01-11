@@ -18,10 +18,12 @@ export const resolvers = {
     games: () => db.getGames(),
     game: (_: any, { id }: { id: string }) => db.getGame(id),
 
+    // Drills
+    drills: () => db.getDrills(),
+    drillTemplates: () => db.getDrillTemplates(),
+    drill: (_: any, { id }: { id: string }) => db.getDrill(id),
+
     // Not yet implemented
-    drills: () => [],
-    drillTemplates: () => [],
-    drill: () => null,
     gameEvents: () => [],
     statistics: () => [],
   },
@@ -83,10 +85,20 @@ export const resolvers = {
       return db.deleteGame(id);
     },
 
+    // Drill mutations
+    createDrill: (_: any, { input }: { input: any }) => {
+      return db.createDrill(input);
+    },
+
+    updateDrill: (_: any, { id, input }: { id: string; input: any }) => {
+      return db.updateDrill(id, input);
+    },
+
+    deleteDrill: (_: any, { id }: { id: string }) => {
+      return db.deleteDrill(id);
+    },
+
     // Not yet implemented
-    createDrill: () => null,
-    updateDrill: () => null,
-    deleteDrill: () => false,
     createGameEvent: () => null,
     updateGameEvent: () => null,
     deleteGameEvent: () => false,
